@@ -1,33 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qworum setup checker</title>
-  <style>
-    p {
-      margin: 5em;
-    }
-
-    .hide {
-      display: none;
-    }
-
-    .show {
-      display: block;
-    }
-  </style>
-</head>
-
-<body>
-  <p class='hide'>
-    ⛔️ This site requires the Qworum browser extension.
-  </p>
-
-  <script type="module" src="_assets/js/index.js"></script>
-
-</body>
-
+<!-- 
+  Redirect the user to his preferred language. 
+  Browser behaviour: https://gist.github.com/ksol/62b489572944ca70b4ba 
+-->
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="keywords" content="">
+		<title>Distributed Web Applications, Micro-frontends, Micro-services — Qworum Demo</title>	
+	</head>
+ 
+	<body>
+		<script>
+			const siteLanguages = [];
+			
+				siteLanguages.push('en'.split('-')[0]);
+			
+				siteLanguages.push('fr'.split('-')[0]);
+			
+				siteLanguages.push('de'.split('-')[0]);
+			
+				siteLanguages.push('tr'.split('-')[0]);
+			
+	
+			var lang = null;
+			if(window.navigator.language){
+				const browserLang = window.navigator.language.split('-')[0];
+				for (let j = 1; j < siteLanguages.length; j++) {
+					const siteLang = siteLanguages[j];
+					if(siteLang === browserLang){
+						lang = siteLang;
+						break;
+					}
+				}
+			}else if(window.navigator.languages){
+				for (let i = 0; i < window.navigator.languages.length; i++) {
+					const browserLang = window.navigator.languages[i].split('-')[0];
+					for (let j = 1; j < siteLanguages.length; j++) {
+						const siteLang = siteLanguages[j];
+						if(siteLang === browserLang){
+							lang = siteLang;
+							break;
+						}
+					}
+					if(lang)break;
+				}
+			}else if(window.navigator.userLanguage){
+				const browserLang = window.navigator.userLanguage.split('-')[0];
+				for (let j = 1; j < siteLanguages.length; j++) {
+					const siteLang = siteLanguages[j];
+					if(siteLang === browserLang){
+						lang = siteLang;
+						break;
+					}
+				}
+			}else if(window.navigator.browserLanguage){
+				const browserLang = window.navigator.browserLanguage.split('-')[0];
+				for (let j = 1; j < siteLanguages.length; j++) {
+					const siteLang = siteLanguages[j];
+					if(siteLang === browserLang){
+						lang = siteLang;
+						break;
+					}
+				}
+			}else if(window.navigator.systemLanguage){
+				const browserLang = window.navigator.systemLanguage.split('-')[0];
+				for (let j = 1; j < siteLanguages.length; j++) {
+					const siteLang = siteLanguages[j];
+					if(siteLang === browserLang){
+						lang = siteLang;
+						break;
+					}
+				}
+			}
+			if(!lang)lang=siteLanguages[0];
+	
+			window.location.assign(
+        `/check-qworum-availability-${lang}.html`
+			);
+		</script>
+	
+	</body>
 </html>
+
