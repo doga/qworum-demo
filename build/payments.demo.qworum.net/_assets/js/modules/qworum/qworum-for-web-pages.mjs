@@ -2264,13 +2264,26 @@ class PhaseParameters {
 
 
 class Qworum {
-  static version = '1.0.0';
+  static version = '0.9.0';
+
+  // Qworum message classes
   static message = {
     GenericData, DataValue, Json, SemanticData, 
     Instruction, Data, Return, Sequence, Goto, Call, Fault, Try, 
     Script, 
     PhaseParameters
   };
+  static Json         = Qworum.message.Json.build;
+  static SemanticData = Qworum.message.SemanticData.build;
+  static Data         = Qworum.message.Data.build;
+  static Return       = Qworum.message.Return.build;
+  static Sequence     = Qworum.message.Sequence.build;
+  static Goto         = Qworum.message.Goto.build;
+  static Call         = Qworum.message.Call.build;
+  static Fault        = Qworum.message.Fault.build;
+  static Try          = Qworum.message.Try.build;
+  static Script       = Qworum.message.Script.build;
+
   static init() {
     // TODO remove this when the extension's content script can do window.history.forward() reliably
     this._sendMessage(
@@ -2317,7 +2330,7 @@ class Qworum {
   static _sendMessage(message, callback) {
     const browserExtensionInfo = Qworum.getBrowserExtensionInfo();
     this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
-    this._log(`web page -> extension: ${JSON.stringify(message)}`);
+    this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
     
     if (browserExtensionInfo.browserType === 'chrome') {
       chrome.runtime.sendMessage(
@@ -2326,7 +2339,7 @@ class Qworum {
         
         function (response) {
           // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
-          console.log(`[Qworum library in Web page] extension -> web page: ${JSON.stringify(response)}`);
+          console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
           if (typeof callback === 'function') callback(response);
         }
       );
@@ -2350,12 +2363,12 @@ class Qworum {
       browserType = 'chrome';
       browserExtensionInfo = {browserType, extensionId: browserExtensionIds[browserType]};
     }
-    if(!browserExtensionInfo) throw new Error('Browser not supported by Qworum.');
+    if(!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported by Qworum.');
     return browserExtensionInfo;
   }
 
   static _log(message) {
-    console.log(`[Qworum for web page] ${message}`);
+    console.log(`[Qworum for web pages] ${message}`);
   }
 }
 
