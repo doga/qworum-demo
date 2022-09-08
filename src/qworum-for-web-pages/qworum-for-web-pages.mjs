@@ -2310,10 +2310,13 @@ class Qworum {
     )
   }
 
-  static evalScript(scriptXmlString, callback) { // TODO send script in JSON format, remove XML library from this module
-    this._log(`[evalScript] `);
+  // executes the Qworum script
+  static eval(script, callback) { // TODO send script in JSON format, remove XML library from this module
+    this._log(`[eval] `);
+    const xmlString = script.toXml();
+    console.log(`script: ${xmlString}`);
     this._sendMessage(
-      { type: '[Web page API v1] eval xml script', script: scriptXmlString },
+      { type: '[Web page API v1] eval xml script', script: xmlString },
       callback
     )
   }

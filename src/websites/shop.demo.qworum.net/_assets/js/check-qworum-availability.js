@@ -1,4 +1,5 @@
-// index.html: Qworum checker
+// Checks whether the Qworum extension is installed on the end-user's browser.
+// Used by check-qworum-availability-LANG.html.
 
 // Use Qworum
 import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
@@ -21,9 +22,16 @@ console.log(`Qworum.version: ${Qworum.version}`);
 
 try {
   Qworum.ping(() => {
-    console.log(`Found Qworum extension !`);
+    console.log(`The Qworum browser extension is running !`);
+
+    // Call the `home` end-point
+    Qworum.eval(
+      Script(Call('@', 'home/'))
+    );
   });
 } catch (error) {
   console.log(`Error: ${error}`);
+
+  // Ask the end-user to install Qworum
   document.querySelector('.hide').className = 'show';
 }
