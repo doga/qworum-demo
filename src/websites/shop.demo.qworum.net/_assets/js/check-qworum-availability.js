@@ -1,4 +1,4 @@
-// Checks whether the Qworum extension is installed on the end-user's browser.
+// Checks whether the Qworum extension is running on the end-user's browser.
 // Used by check-qworum-availability-LANG.html.
 
 // Use Qworum
@@ -26,7 +26,11 @@ try {
 
     // Call the `home` end-point
     Qworum.eval(
-      Script(Call('@', 'home/'))
+      Script(
+        Call('@', 'home/')
+        // Fault('* testing')
+        // Return(Json('test value'))
+      )
     );
   });
 } catch (error) {

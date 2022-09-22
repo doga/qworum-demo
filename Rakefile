@@ -30,6 +30,8 @@ task build: [:clear_build, :get_qworum_module_for_web_pages] do
     # add the newest version of the Qworum module to the websites
     cp 'src/qworum-for-web-pages/qworum-for-web-pages.mjs', "#{dir}/_assets/js/modules/qworum"
   end
+  sh "date"
+
 end
 
 desc "Get the latest version of qworum-for-web-pages.mjs (only works on the author's computer)"
