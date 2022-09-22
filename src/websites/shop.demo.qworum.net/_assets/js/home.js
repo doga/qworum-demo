@@ -52,13 +52,13 @@ function displayTheArticlesOnSale() {
     button.addEventListener('click', () => {
       // Execute a Qworum script
       Qworum.eval(Script(
-        Sequence([
+        Sequence(
           // Call the Qworum end-point to view an article ...
           Call('@', `../view-article/?articleId=${i}`),
           
           // ... then return to this page.
           Goto('index.html'),
-        ])
+        )
       ))
     });
   }
