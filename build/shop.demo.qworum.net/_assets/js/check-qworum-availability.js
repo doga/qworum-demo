@@ -28,9 +28,8 @@ try {
     Qworum.eval(
       Script(
         Call('@', 'home/')
-
-        // Fault('* testing')
-        // Return(Json('json value'))
+        // Fault('* test fault')
+        // Return(Json('test value'))
       )
     );
   });

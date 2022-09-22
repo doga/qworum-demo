@@ -1,5 +1,5 @@
 // from an online blog post
-class MyAddToCartButton extends HTMLElement {
+class MyAddToCartButton extends HTMLElement {// TODO delete this file
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });

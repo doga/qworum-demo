@@ -2543,17 +2543,26 @@ class Qworum {
     )
   }
 
+  /**
+   * Profile of functions that are callback parameters for Qworum.eval().
+   * @callback evalCallback
+   * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataOrFault
+   */
+
   /** 
    * 🚀 Evaluates a Qworum script.
    * @static
    * @param {Qworum.message.Script} script
+   * @param {evalCallback} callback
    * @throws {Error}
    * @example
    * Qworum.eval(Script(Fault()));
    * @see <https://qworum.net/en/specification/v1/#script>
    */
-  static eval(script) { // TODO send script in JSON format, remove XML library from this module
+  static eval(script, callback) { // TODO send script in JSON format, remove XML library from this module
     this._log(`[eval] `); 
+    if(!script)return;
+
     const xmlString = script.toXml();
     this._log(`[eval] script: ${xmlString}`);
     this._sendMessage(
@@ -2606,20 +2615,43 @@ class Qworum {
           }
 
         // eval terminated the Qworum session normally, inform the end user
-        } else if (msg.body.data) {
-          Qworum._log('service worker response is data');
-          alert('The application has quit normally.');
-          window.close();
-        // eval terminated the Qworum session normally, inform the end user
-        } else if (msg.body.fault) {
-          const faultType = msg.body.fault.value.type;
-          Qworum._log('service worker response is a fault');
-          alert(`The application has quit with a "${faultType}" fault.`);
-          window.close();
+        } else {
+          // eval terminated the Qworum session normally
+          let result;
+          if (msg.body.data) {
+            Qworum._log('service worker response is data');
+            for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
+              try {
+                result = DataType.fromIndexedDb(msg.body.data);
+              } catch (error) {}
+              if(result)break;
+            }
+            if (result) {
+              alert(`The application has terminated normally. Returned data: ${JSON.stringify(result.value)}`);
+              // window.close(); // Scripts may close only the windows that were opened by them.
+            } else {
+              Qworum._log('error: unrecognised data');
+              result = Qworum.Fault('runtime');
+            }
+          }
+
+          if (msg.body.fault) {
+            try {
+              result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
+            } catch (error) {
+              Qworum._log('error: unrecognised fault');
+              result = Qworum.Fault('runtime');
+            }
+            Qworum._log('service worker response is a fault');
+            alert(`The application has terminated with a "${result.type}" fault.`);
+            // window.close(); // Scripts may close only the windows that were opened by them.
+          }
+
+          if (callback) callback(result);
         }
+
       }
     )
-
   }
 
   static _sendMessage(message, callback) {
