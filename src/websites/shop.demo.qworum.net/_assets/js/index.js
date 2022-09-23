@@ -1,6 +1,4 @@
 // Application data
-import { shopUrl } from "./modules/website-urls.mjs";
-console.log(`shopUrl: ${shopUrl}`);
 
 const siteLanguages = ['en', 'de', 'fr', 'tr'];
 
@@ -58,6 +56,4 @@ if(!lang)lang=siteLanguages[0];
 
 console.log(`lang: ${lang}`);
 
-window.location.assign(
-`${shopUrl}/check-qworum-availability-${lang}.html`
-);
+window.location.assign(`@@shop/check-qworum-availability-${lang}.html`);

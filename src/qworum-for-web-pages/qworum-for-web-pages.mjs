@@ -2506,12 +2506,20 @@ class Qworum {
 
   // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
 
+  /**
+   * Profile of functions that are callback parameters for Qworum.setData().
+   * @callback setDataCallback
+   * @param {boolean} success - True if data was written.
+   * @param {string[] | string} path - The path of the data container.
+   * @param {Json | SemanticData} newValue
+   */
+
   /** 
    * 🚀 Sets the value contained in a data container.
    * @static
    * @param {string[] | string} path - The path of the data container.
-   * @param {Json | SemanticData} newValue
-   * @param callback - A function that is executed if the write operation was successful.
+   * @param {Qworum.message.Json | Qworum.message.SemanticData} newValue
+   * @param {setDataCallback} callback
    * @throws {Error}
    * @example
    * Qworum.setData('current year', Qworum.Json(2022), () => console.log('The write operation was successful.'));
@@ -2519,34 +2527,75 @@ class Qworum {
    */
   static setData(path, newValue, callback) {
     this._log(`[setData] `);
+    // validate path
+    if(typeof path === 'string')path = [path];
+    if(!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+    // validate newValue
+    if(!(
+      newValue && 
+      [Qworum.message.Json, Qworum.message.SemanticData].find(dataType => (newValue instanceof dataType))
+    )) throw new Error('invalid value');
+
+    // set 
     this._sendMessage(
-      { type: '[Web page API v1] set data', path, value: newValue },
-      callback
+      { type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() },
+      (response) => {
+        if(typeof callback !== 'function') return;
+        if (response.status !== 200) {
+          callback(false, path, newValue); return;
+        }
+        callback(true, path, newValue);
+      }
     )
   }
+
+  /**
+   * Profile of functions that are callback parameters for Qworum.getData().
+   * @callback getDataCallback
+   * @param {null | Qworum.message.Json | Qworum.message.SemanticData} value - The value of the data container.
+   * @param {string[]} path - The path of the data container.
+   */
 
   /** 
    * 🚀 Reads the value contained in a data container.
    * @static
    * @param {string[] | string} path - The path of the data container.
-   * @param callback - A function that is executed if the read operation was successful.
+   * @param {getDataCallback} callback
    * @throws {Error}
    * @example
    * Qworum.getData('current year', (json) => console.log(`Year: ${json.value}`));
    * @see <https://qworum.net/en/specification/v1/#data>
    */
-  static getData(path, callback) {
+  static getData(path, callback) { // TODO add new function: static getMultipleData(paths, callback)
     this._log(`[getData] `);
+    if(typeof path === 'string')path = [path];
+    if(!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+
     this._sendMessage(
-      { type: '[Web page API v1] get data', path: path },
-      callback
+      { type: '[Web page API v1] get data', path },
+      (response) => {
+        let value = null;
+        if (response.status !== 200) {
+          callback(value, path); return;
+        }
+        try {
+          value = Qworum.message.Json.fromIndexedDb(response.body);
+        } catch (error) {
+          try {
+            value = Qworum.message.SemanticData.fromIndexedDb(response.body);
+          } catch (error) {
+          }
+        }
+        if(typeof callback !== 'function') return;
+        callback(value, path);
+      }
     )
   }
 
   /**
    * Profile of functions that are callback parameters for Qworum.eval().
    * @callback evalCallback
-   * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataOrFault
+   * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataValueOrFault
    */
 
   /** 

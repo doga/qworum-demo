@@ -1,5 +1,5 @@
 /* variables */
-:root {
+/* :root {
   --accent-color: #C9A233;
 }
 
@@ -17,7 +17,9 @@ body {
 #content > p {
   text-align: center;
   font-weight: bolder;
+} */
+
+button:hover {
+  cursor:pointer;
 }
-
-
 

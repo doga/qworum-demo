@@ -16,26 +16,50 @@ Try          = Qworum.Try,
 // Qworum script
 Script       = Qworum.Script;
 
-// Application data
-import { articles } from "./modules/articles.mjs";
-console.log(`articles: ${JSON.stringify(articles)}`);
-
 // Web components
-import { MyArticle } from "./modules/web-components/article.mjs";
-import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
-window.customElements.define('my-article', MyArticle);
-window.customElements.define('my-site-banner', MySiteBanner);
+// import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
+// window.customElements.define('my-site-banner', MySiteBanner);
 
 // UI
 
-Qworum.getData('article id', (articleId) => {
-  if (!(articleId && articleId instanceof Qworum.message.Json && articles[articleId.value])) {
+console.log(`reading line items to add`);
+Qworum.getData('line items to add', (lineItemsToAdd) => {
+  // Validate the call parameter
+  if (!(lineItemsToAdd && lineItemsToAdd instanceof Qworum.message.Json && lineItemsToAdd.value instanceof Array)) { // TODO deep data validation
     Qworum.eval(Script(
-      Fault('* the "article id" call parameter is missing or invalid')
+      Fault('* the "line items to add" call parameter is missing or invalid')
     ));
     return;
   }
-  displayTheArticleOnSale(articleId.value);
+
+  console.log(`reading line items`);
+
+  // Update the cart
+  Qworum.getData(['@', 'line items'], (lineItems) => {
+    if(!(lineItems instanceof Qworum.message.Json)){
+      lineItems = [];
+    } else {
+      lineItems = lineItems.value;
+    }
+    lineItems = lineItems.concat(lineItemsToAdd);
+    lineItems = Json(lineItems);
+
+    console.log(`updating line items`);
+    Qworum.setData(['@', 'line items'], lineItems, (success) => {
+      if(!success){
+        Qworum.eval(Script(
+          Fault('* the shopping cart was not updated')
+        ));
+        return;
+      }
+      // show the cart
+      Qworum.eval(Script(
+        Call('@', '../show-cart/')
+      ));
+      // window.location.replace('../show-cart/');
+    });
+  });
+
 });
 
 
@@ -59,7 +83,7 @@ function displayTheArticleOnSale(articleId) {
     Qworum.eval(Script(
       Sequence(
         Call(
-          ['@', 'shopping cart'], '/build/cart.demo.qworum.net/add-items/', 
+          ['@', 'shopping cart'], '@@cart/add-items/', 
           [
             {name: 'line items to add', value: Json([{article: article.data, count: 1}])}
           ]

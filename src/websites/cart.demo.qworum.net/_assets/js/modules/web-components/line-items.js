@@ -92,13 +92,13 @@ class MyLineItems extends HTMLElement {
         total += lineItemData.price.EUR;
 
         const
-          lineItem = document.createElement('div'),
-          titleAndCount = document.createElement('p'),
-          title = document.createElement('span'),
-          count = document.createElement('span'),
-          price = document.createElement('p'),
-          priceAmount = document.createElement('span'),
-          priceCurrency = document.createElement('span');
+        lineItem      = document.createElement('div'),
+        titleAndCount = document.createElement('p'),
+        title         = document.createElement('span'),
+        count         = document.createElement('span'),
+        price         = document.createElement('p'),
+        priceAmount   = document.createElement('span'),
+        priceCurrency = document.createElement('span');
 
         lineItem.setAttribute('class', 'line-item');
         lineItem.append(titleAndCount, price);
@@ -129,4 +129,4 @@ class MyLineItems extends HTMLElement {
   }
 }
 
-window.customElements.define('my-line-items', MyLineItems);
+export { MyLineItems };

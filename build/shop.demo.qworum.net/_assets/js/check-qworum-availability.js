@@ -24,10 +24,13 @@ try {
   Qworum.ping(() => {
     console.log(`The Qworum browser extension is running !`);
 
-    // Call the `home` end-point
+    // Execute a Qworum script
+    // (See https://qworum.net/en/specification/v1/#script)
     Qworum.eval(
       Script(
+        // Call the `home` end-point
         Call('@', 'home/')
+
         // Fault('* test fault')
         // Return(Json('test value'))
       )

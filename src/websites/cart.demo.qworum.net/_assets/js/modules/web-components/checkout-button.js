@@ -1,5 +1,5 @@
 // from an online blog post
-class MyAddToCartButton extends HTMLElement {// TODO delete this file
+class MyCheckoutButton extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -11,7 +11,7 @@ class MyAddToCartButton extends HTMLElement {// TODO delete this file
       <style>
         :host {
           color: white; 
-          --accent-color: #C9A233;
+          --accent-color: #3241c2;
         }
         button {
           color: white; 
@@ -22,7 +22,7 @@ class MyAddToCartButton extends HTMLElement {// TODO delete this file
         }
       </style>
       <button id='button'>
-        Add to shopping cart
+        To checkout ⇒
       </button>
     `;
     this.shadowRoot.appendChild(t.content.cloneNode(true));
@@ -30,24 +30,22 @@ class MyAddToCartButton extends HTMLElement {// TODO delete this file
   }
 
   handleClick(event) {
-    if (!this.article) return;
-    window.location.href = `add-to-cart.qrm.xml?articleId=${this.article}`;
+    // if(!this.article)return;
+    window.location.href = 'checkout.qrm.xml';
   }
 
   // manage custom element attributes
-  static get observedAttributes() {
-    return ['article'];
-  }
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    if (attrName === 'article') {
-      this.article = newValue;
-      this.shadowRoot.getElementById('button').dataset.article = newValue;
-      // console.log(`my-add-to-cart-button: set article to ${newValue}`);
-    }
-  }
+  // static get observedAttributes(){
+  //   return ['article'];
+  // }
+  // attributeChangedCallback(attrName, oldValue, newValue) {
+  //   if (attrName === 'article') {
+  //     this.article = newValue;
+  //     this.shadowRoot.getElementById('button').dataset.article = newValue;
+  //     // console.log(`my-add-to-cart-button: set article to ${newValue}`);
+  //   }
+  // }
 
 }
 
-export {MyAddToCartButton};
-
-// window.customElements.define('my-add-to-cart-button', MyAddToCartButton);
+export {MyCheckoutButton};

@@ -100,4 +100,4 @@ class MySiteBanner extends HTMLElement {
   
 }
 
-window.customElements.define('my-site-banner', MySiteBanner);
+export {MySiteBanner};

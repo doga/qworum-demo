@@ -17,31 +17,34 @@ Try          = Qworum.Try,
 Script       = Qworum.Script;
 
 // Application data
-import { shopUrl, cartUrl, paymentsUrl } from "./modules/website-urls.mjs";
 import { articles } from "./modules/articles.mjs";
-console.log(`shopUrl: ${shopUrl}`);
 console.log(`articles: ${JSON.stringify(articles)}`);
 
 // Web components
-// import { MyAddToCartButton } from "./modules/web-components/add-to-cart-button.mjs";
 import { MyArticle } from "./modules/web-components/article.mjs";
 import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
-// window.customElements.define('my-add-to-cart-button', MyAddToCartButton);
 window.customElements.define('my-article', MyArticle);
 window.customElements.define('my-site-banner', MySiteBanner);
 
 // UI
-const 
-query     = new URLSearchParams(window.location.search),
-articleId = parseInt(query.get('articleId') || '0');
 
-displayTheArticleOnSale(articleId);
+Qworum.getData('article id', (articleId) => {
+  if (!(articleId && articleId instanceof Qworum.message.Json && articles[articleId.value])) {
+    Qworum.eval(Script(
+      Fault('* the "article id" call parameter is missing or invalid')
+    ));
+    return;
+  }
+  displayTheArticleOnSale(articleId.value);
+});
+
 
 function displayTheArticleOnSale(articleId) {
+  // alert(`article id: ${articleId}`);
   const
   contentArea     = document.getElementById('content'),
-  homepageButton  = document.getElementById('homepage-button'),
   addToCartButton = document.getElementById('add-to-cart-button'),
+  homepageButton  = document.getElementById('homepage-button'),
   article         = {
     data   : articles[articleId],
     element: document.createElement('my-article')
@@ -51,12 +54,25 @@ function displayTheArticleOnSale(articleId) {
   article.element.setAttribute('description', article.data.description);
   contentArea.append(article.element);
 
+  addToCartButton.addEventListener('click', () => {
+    // Execute a Qworum script
+    Qworum.eval(Script(
+      Sequence(
+        Call(
+          ['@', 'shopping cart'], '@@cart/add-items/', 
+          [
+            {name: 'line items to add', value: Json([{article: article.data, count: 1}])}
+          ]
+        ),
+        Goto('index.html')
+      )
+    ));
+  });
+
   homepageButton.addEventListener('click', () => {
     // Execute a Qworum script
     Qworum.eval(Script(
-      Return(Json(0)) // BUG terminates the application
-    ))
+      Return(Json(0))
+    ));
   });
-
 }
-

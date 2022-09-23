@@ -17,16 +17,12 @@ Try          = Qworum.Try,
 Script       = Qworum.Script;
 
 // Application data
-import { shopUrl, cartUrl, paymentsUrl } from "./modules/website-urls.mjs";
 import { articles } from "./modules/articles.mjs";
-console.log(`shopUrl: ${shopUrl}`);
 console.log(`articles: ${JSON.stringify(articles)}`);
 
 // Web components
-import { MyAddToCartButton } from "./modules/web-components/add-to-cart-button.mjs";
 import { MyArticle } from "./modules/web-components/article.mjs";
 import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
-window.customElements.define('my-add-to-cart-button', MyAddToCartButton);
 window.customElements.define('my-article', MyArticle);
 window.customElements.define('my-site-banner', MySiteBanner);
 
@@ -51,12 +47,26 @@ function displayTheArticlesOnSale() {
 
     button.addEventListener('click', () => {
       // Execute a Qworum script
+      // (See https://qworum.net/en/specification/v1/#script)
       Qworum.eval(Script(
         Sequence(
-          // Call the Qworum end-point to view an article ...
-          Call('@', `../view-article/?articleId=${i}`),
+          // Call the service end-point to view an article.
+          // (See https://qworum.net/en/specification/v1/#call)
+          Call(
+            // The owner of this call is the same Qworum object as the owner of the current call.
+            // (See https://qworum.net/en/specification/v1/#object)
+            ['@'], 
+            
+            // URL of the end-point to call.
+            '../view-article/', 
+
+            // The data parameters of this call.
+            [
+              {name: 'article id', value: Json(i)}
+            ]
+          ),
           
-          // ... then return to this page.
+          // Return to this page.
           Goto('index.html'),
         )
       ))
