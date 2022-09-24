@@ -1,6 +1,5 @@
 // Qworum library
 import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
-console.log(`Qworum.version: ${Qworum.version}`);
 const
 // Qworum Data value types
 Json         = Qworum.Json,
@@ -16,13 +15,7 @@ Try          = Qworum.Try,
 // Qworum script
 Script       = Qworum.Script;
 
-// Web components
-// import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
-// window.customElements.define('my-site-banner', MySiteBanner);
-
-// UI
-
-console.log(`reading line items to add`);
+// Update the cart
 Qworum.getData('line items to add', (lineItemsToAdd) => {
   // Validate the call parameter
   if (!(lineItemsToAdd && lineItemsToAdd instanceof Qworum.message.Json && lineItemsToAdd.value instanceof Array)) { // TODO deep data validation
@@ -31,72 +24,57 @@ Qworum.getData('line items to add', (lineItemsToAdd) => {
     ));
     return;
   }
-
-  console.log(`reading line items`);
+  lineItemsToAdd = lineItemsToAdd.value;
 
   // Update the cart
   Qworum.getData(['@', 'line items'], (lineItems) => {
-    if(!(lineItems instanceof Qworum.message.Json)){
-      lineItems = [];
-    } else {
+    if(lineItems instanceof Qworum.message.Json){
       lineItems = lineItems.value;
+    } else {
+      lineItems = [];
     }
-    lineItems = lineItems.concat(lineItemsToAdd);
-    lineItems = Json(lineItems);
+    // lineItems = lineItems.concat(lineItemsToAdd);
+    
+    for (const lineItemToAdd of lineItemsToAdd) {
+      const lineItem = lineItems.find(li => li.id === lineItemToAdd.id);
+      if (lineItem) {
+        lineItem.count += lineItemToAdd.count;
+      } else {
+        lineItems.push(lineItemToAdd);
+      }
+    }
 
-    console.log(`updating line items`);
-    Qworum.setData(['@', 'line items'], lineItems, (success) => {
+    // Compute the cart total in euro cents
+    let totalCents = 0;
+    for (const lineItem of lineItems) {
+      totalCents += Math.trunc(lineItem.price.EUR * 100) * lineItem.count;
+    }
+
+    Qworum.setData(['@', 'line items'], Json(lineItems), (success) => {
       if(!success){
         Qworum.eval(Script(
-          Fault('* the shopping cart was not updated')
+          Fault('* the line items was not updated')
         ));
         return;
       }
-      // show the cart
-      Qworum.eval(Script(
-        Call('@', '../show-cart/')
-      ));
-      // window.location.replace('../show-cart/');
+
+      Qworum.setData(['@', 'total'], Json({EUR: totalCents / 100}), (success) => {
+        if(!success){
+          Qworum.eval(Script(
+            Fault('* the total was not updated')
+          ));
+          return;
+        }
+  
+        // show the cart
+        // window.location.replace('../show-cart/');
+        Qworum.eval(Script(
+          Call('@', '../show-cart/')
+        ));
+      });
     });
+
   });
 
 });
 
-
-function displayTheArticleOnSale(articleId) {
-  // alert(`article id: ${articleId}`);
-  const
-  contentArea     = document.getElementById('content'),
-  addToCartButton = document.getElementById('add-to-cart-button'),
-  homepageButton  = document.getElementById('homepage-button'),
-  article         = {
-    data   : articles[articleId],
-    element: document.createElement('my-article')
-  };
-
-  article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
-  article.element.setAttribute('description', article.data.description);
-  contentArea.append(article.element);
-
-  addToCartButton.addEventListener('click', () => {
-    // Execute a Qworum script
-    Qworum.eval(Script(
-      Sequence(
-        Call(
-          ['@', 'shopping cart'], '@@cart/add-items/', 
-          [
-            {name: 'line items to add', value: Json([{article: article.data, count: 1}])}
-          ]
-        ),
-        Goto('index.html')
-      )
-    ));
-  });
-
-  homepageButton.addEventListener('click', () => {
-    // Execute a Qworum script
-    Qworum.eval(Script(
-      Return(Json(0))
-    ));
-  });
-}

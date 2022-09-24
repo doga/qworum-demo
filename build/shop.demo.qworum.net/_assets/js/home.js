@@ -28,6 +28,19 @@ window.customElements.define('my-site-banner', MySiteBanner);
 
 // UI
 displayTheArticlesOnSale();
+displayCartTotal();
+
+function displayCartTotal() {
+  Qworum.getData(['@', 'shopping cart', 'total'], (total) => {
+    if (total instanceof Qworum.message.Json) {
+      total = total.value.EUR;
+    } else {
+      total = 0.0;
+    }
+
+    document.querySelector('#banner').setAttribute('cart-total', `${total}`);
+  });
+}
 
 function displayTheArticlesOnSale() {
   const contentArea = document.getElementById('content');

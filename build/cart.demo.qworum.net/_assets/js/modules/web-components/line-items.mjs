@@ -79,17 +79,17 @@ class MyLineItems extends HTMLElement {
   attributeChangedCallback(attrName, oldValue, newValue) {
     if (attrName === 'line-items') {
       const
-        lineItems = JSON.parse(newValue),
-        lineItemsElement = this.shadowRoot.querySelector('#line-items'),
-        totalAmountElement = this.shadowRoot.querySelector('#total-amount');
+      lineItems          = JSON.parse(newValue),
+      lineItemsElement   = this.shadowRoot.querySelector('#line-items'),
+      totalAmountElement = this.shadowRoot.querySelector('#total-amount');
 
       lineItemsElement.innerHTML = '';
       totalAmountElement.innerHTML = '';
 
-      let total = 0.0;
+      let totalCents = 0; // TODO use a 'total' attribute instead, for getting the total which the cart stores
 
       for (const lineItemData of lineItems) {
-        total += lineItemData.price.EUR;
+        totalCents += Math.trunc(lineItemData.price.EUR * 100) * lineItemData.count;
 
         const
         lineItem      = document.createElement('div'),
@@ -123,7 +123,7 @@ class MyLineItems extends HTMLElement {
 
         lineItemsElement.append(lineItem);
       }
-      totalAmountElement.innerText = `${total}`;
+      totalAmountElement.innerText = `${Math.trunc(totalCents / 100)}.${totalCents % 100}`;
       // console.log(`my-add-to-cart-button: set article to ${newValue}`);
     }
   }

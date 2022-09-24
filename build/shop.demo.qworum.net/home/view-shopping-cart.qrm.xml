@@ -1,6 +1,6 @@
 <sequence xmlns="https://qworum.net/ns/v1/instruction/">
   <!-- View the shopping cart. -->
-  <call object='["@", "shopping cart"]' href="/build/cart.demo.qworum.net/view/" />
+  <call object='["@", "shopping cart"]' href="/build/cart.demo.qworum.net/show-cart/" />
 
   <goto href="index.html" />
 </sequence>
