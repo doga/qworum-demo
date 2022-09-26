@@ -49,10 +49,11 @@ function updateCart() {
       }
 
       // Compute the cart total in euro cents
-      let totalCents = 0;
-      for (const lineItem of lineItems) {
-        totalCents += Math.trunc(lineItem.price.EUR * 100) * lineItem.count;
-      }
+      const totalCents =
+      lineItems.reduce(
+        (totalCents, lineItem) => totalCents + Math.trunc(lineItem.price.EUR * 100) * lineItem.count,
+        0
+      );
 
       Qworum.setData(['@', 'line items'], Json(lineItems), (success) => {
         if(!success){
