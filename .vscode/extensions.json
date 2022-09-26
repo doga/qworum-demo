@@ -1,7 +1,7 @@
 {
   "recommendations": [
+    "qworum.qworum",
     "ritwickdey.liveserver",
-    "castwide.solargraph",
-    "qworum.qworum"
+    "castwide.solargraph"
   ]
 }

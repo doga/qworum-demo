@@ -4,9 +4,12 @@ This demo shows the best practice for implementing [Qworum](https://qworum.net)-
 
 ## What makes this a Jamstack demo?
 
-This demo only uses static web pages.
-It uses JavaScript to generate Qworum messages on the client
-instead of dynamically generating XML Qworum messages on the server and then sending them to web browsers.
+This demo uses only static files. This implies that Qworum scripts aren't dynamically generated on the server, but instead they are:
+
+- generated inside web pages with JavaScript, or
+- static XML files.
+
+Also, this demo does not send any data to Qworum service endpoints on the server. Instead, the endpoints handle the data on the client exclusively.
 
 ## What is this demo about?
 
