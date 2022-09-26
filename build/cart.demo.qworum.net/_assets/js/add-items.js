@@ -58,7 +58,7 @@ function updateCart() {
       Qworum.setData(['@', 'line items'], Json(lineItems), (success) => {
         if(!success){
           Qworum.eval(Script(
-            Fault('* the line items was not updated')
+            Fault('* the line items list was not updated')
           ));
           return;
         }

@@ -18,7 +18,7 @@ This demo is available on [https://shop.demo.qworum.net](https://shop.demo.qworu
 
 ## How to run the demo on your machine
 
-You need a web server that can serve static files. I would recommend opening this directory in Visual Studio Code, 
+You need a web server that can serve static files. I would recommend opening this directory in Visual Studio Code,
 and then launching the following file with the `Live Server` VS Code extension:
 
 - `build/shop.demo.qworum.net/index.html`

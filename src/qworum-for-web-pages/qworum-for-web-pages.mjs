@@ -2332,13 +2332,13 @@ class Qworum {
    * // Example 1
    * const call1 = Qworum.Call(
    *   '@', 'home/', 
-   *   {param1: Qworum.Json(2022)}
+   *   {name: 'current year', value: Qworum.Json(2022)}
    * );
    * // Example 2
    * const call2 = Qworum.Call(
-   *   '@', 'home/',
-   *   {param1: Qworum.Json(2022)}, false,
-   *   {object1: ['@', 'a Qworum object']}
+   *   ['@'], 'home/',
+   *   [{name: 'current year', value: Qworum.Json(2022)}], false,
+   *   [{name: , object: ['@', 'a Qworum object']}]
    * );
    * @see <https://qworum.net/en/specification/v1/#call>
    */
@@ -2356,8 +2356,8 @@ class Qworum {
    * @returns {Qworum.message.Goto}
    * @example
    * const goto = Qworum.Goto(
-   *   '@', 'home/',
-   *   {param1: Qworum.Json(2022)}
+   *   ['@'], 'home/',
+   *   [{name: 'current year', value: Qworum.Json(2022)}]
    * );
    * @see <https://qworum.net/en/specification/v1/#goto>
    */
@@ -2465,14 +2465,12 @@ class Qworum {
    * @returns {Qworum.message.SemanticData}
    * @example
    * const json = Qworum.SemanticData(`{
-   *  "@context": {
-   *    "@vocab": "https://schema.org/"
-   *  },
-   *  "@id": "https://www.wikidata.org/wiki/Q92760",
-   *  "@type"     : "Person",
-   *  "givenName" : "Claude",
-   *  "familyName": "Shannon",
-   *  "birthDate" : "1916-04-30"
+   *   "@context"  : "https://schema.org/",
+   *   "@id"       : "https://www.wikidata.org/wiki/Q92760",
+   *   "@type"     : "Person",
+   *   "givenName" : "Claude",
+   *   "familyName": "Shannon",
+   *   "birthDate" : "1916-04-30"
    * }`);
    * @see <https://qworum.net/en/specification/v1/#semantic>
    */
