@@ -2706,19 +2706,25 @@ class Qworum {
     this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
     this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
 
-    if (browserExtensionInfo.browserType === 'chrome') {
-      chrome.runtime.sendMessage(
-        browserExtensionInfo.extensionId,
-        message,
+    try {
+      if (browserExtensionInfo.browserType === 'chrome') {
+        chrome.runtime.sendMessage(
+          browserExtensionInfo.extensionId,
+          message,
 
-        function (response) {
-          // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
-          console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
-          if (typeof callback === 'function') callback(response);
-        }
-      );
+          function (response) {
+            if(!response)throw new Error('The Qworum extension is not installed or is disabled.');
+            // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
+            console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
+            if (typeof callback === 'function') callback(response);
+          }
+        );
+      }
+    } catch (error) {
+        this._log('The Qworum extension is not installed or is disabled.');
     }
-  }
+
+}
 
   // Returns a non-null value if there is a Qworum extension for this browser.
   // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website !!!

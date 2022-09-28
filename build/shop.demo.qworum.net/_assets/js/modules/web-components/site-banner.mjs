@@ -58,6 +58,13 @@ class MySiteBanner extends HTMLElement {
         .header-right {
           float: right;
         }
+
+        button {
+          cursor: pointer;
+          font-size: 1.2em;
+          padding: 1em;
+          border: 0px;
+        }
         
         /* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
         @media screen and (max-width: 500px) {
@@ -76,7 +83,9 @@ class MySiteBanner extends HTMLElement {
           Company Logo
         </a>
         <div class="header-right">
-          <a href="view-shopping-cart.qrm.xml">🛒 Shopping cart (<span id='cart-total'>0</span> €)</a>
+          <button onclick="window.location.replace('view-shopping-cart.qrm.xml')">
+            🛒 Shopping cart (<span id='cart-total'>0</span> €)
+          </button>
         </div>
       </div>
     `;

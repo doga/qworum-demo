@@ -2,13 +2,14 @@
 # Doc for fileutils: https://ruby-doc.org/stdlib-2.7.2/libdoc/fileutils/rdoc/index.html
 
 # Before publishing to GitHub, run `rake build` in test mode, and then commit.
-MODE= :test
-# MODE= :production
+MODES = [:test, :production]
+MODE= MODES.first
+# MODE= MODES.last
 
 task default: :help
 
 desc 'Show available Rake tasks'
-task :help do
+task help: [:show_mode] do
     sh "rake -T"
 end
 
@@ -74,4 +75,9 @@ task :clear_build do
     sh "trash build/*"
   rescue
   end
+end
+
+desc "Show the mode (#{MODES.join ' or '})"
+task :show_mode do
+    puts "Mode: #{MODE} (edit Rakefile to switch between #{MODES.join ' and '})"
 end

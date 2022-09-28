@@ -85,7 +85,7 @@ function displayTheArticleOnSale(articleId) {
             }])
           }]
         ),
-        Goto('index.html')
+        // Goto('index.html')
       )
     ));
   });
