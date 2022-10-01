@@ -1090,13 +1090,26 @@ class Json extends GenericData {
 }
 class SemanticData extends GenericData {
     static tag = 'semantic';
+    static dataTypes = [
+        'json-ld',
+        'n-quads'
+    ];
+    _type;
     _value;
-    static build(value) {
-        return new SemanticData(value);
+    static build(value, type) {
+        return new SemanticData(value, type);
     }
-    constructor(value){
+    constructor(value, type){
         super();
         this._value = value;
+        if (type == null || type == undefined || type.trim().length == 0) {
+            type = SemanticData.dataTypes[0];
+        }
+        if (!SemanticData.dataTypes.includes(type)) throw new Error('Unknown semantic data type');
+        this._type = type;
+    }
+    get type() {
+        return this._type;
     }
     get value() {
         return this._value;
@@ -1121,7 +1134,17 @@ class SemanticData extends GenericData {
                 ].includes(node.type)) continue;
                 text += node.text;
             }
-            result = new SemanticData(text);
+            const type = element.attributes['type'];
+            let detectedType = SemanticData.dataTypes[0];
+            if (type) {
+                for (const dataType of SemanticData.dataTypes){
+                    if (`${dataType}` === type) {
+                        detectedType = dataType;
+                        break;
+                    }
+                }
+            }
+            result = new SemanticData(text, detectedType);
         } catch (error) {
             errorMessage = `${error}`;
         } finally{
@@ -1138,19 +1161,28 @@ class SemanticData extends GenericData {
         ]) : null, prefix = newPrefix || existingPrefix, attributes = Object.create(null), children = [
             new XmlText(JSON.stringify(this.value))
         ], name = XmlNamespaceStack.elementName(SemanticData.tag, prefix), element = new XmlElement(name, attributes, children);
+        attributes['type'] = this.type;
         if (useNewPrefix) {
             attributes[XmlNamespaceStack.nsAttrName(newPrefix)] = namespace;
         }
         return element;
     }
     static fromIndexedDb(encodedData) {
-        if (!(encodedData && typeof encodedData === 'object' && !Array.isArray(encodedData) && encodedData.type === `${SemanticData.namespace} ${SemanticData.tag}` && typeof encodedData.value === 'object' && typeof encodedData.value.text === 'string')) throw new Error('wrong IndexedDB object');
-        return new SemanticData(encodedData.value.text);
+        if (!(encodedData && typeof encodedData === 'object' && !Array.isArray(encodedData) && encodedData.type === `${SemanticData.namespace} ${SemanticData.tag}` && typeof encodedData.value === 'object' && typeof encodedData.value.type === 'string' && typeof encodedData.value.text === 'string')) throw new Error('wrong IndexedDB object');
+        let detectedType = SemanticData.dataTypes[0];
+        for (const dataType of SemanticData.dataTypes){
+            if (`${dataType}` === encodedData.value.type) {
+                detectedType = dataType;
+                break;
+            }
+        }
+        return new SemanticData(encodedData.value.text, detectedType);
     }
     toIndexedDb() {
         return {
             type: `${SemanticData.namespace} ${SemanticData.tag}`,
             value: {
+                type: this.type,
                 text: this.value
             }
         };
@@ -2259,10 +2291,9 @@ class PhaseParameters {
 // export { Instruction as Instruction, Data as Data, Return as Return, Sequence as Sequence, Goto as Goto, Call as Call, Fault as Fault, Try as Try };
 // export { Script as Script };
 // export { PhaseParameters as PhaseParameters };
-// export const MESSAGE_VERSION = '0.9.6';
+// export const MESSAGE_VERSION = '0.9.10';
 
-
-const MESSAGE_VERSION = '0.9.6';
+const MESSAGE_VERSION = '0.9.10';
 
 // end qworum-messages-*.mjs
 
@@ -2284,7 +2315,7 @@ class Qworum {
    * Implementation version. 
    * @static
    */
-  static version = '0.9.5';
+  static version = '0.9.10';
 
   /** 
    * Qworum message classes. 
@@ -2460,11 +2491,12 @@ class Qworum {
    * @function Qworum.SemanticData
    * @static
    * @param {string} value - The semantic data value.
+   * @param {string | undefined} type - The type of the semantic data value. One of 'json-ld', 'n-quads'.
    * @throws {Error}
    * @returns {Qworum.message.SemanticData}
    * @example
    * const json = Qworum.SemanticData(`{
-   *   "@context"  : "https://schema.org/",
+   *   "@context"  : {"@vocab": "https://schema.org/"},
    *   "@id"       : "https://www.wikidata.org/wiki/Q92760",
    *   "@type"     : "Person",
    *   "givenName" : "Claude",
