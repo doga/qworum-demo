@@ -28,6 +28,6 @@ and then launching the following file with the `Live Server` VS Code extension:
 
 ## BUGS
 
-- shop's cart total indicator is sometimes reset.
+None.
 
 ∎
