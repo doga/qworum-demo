@@ -2286,14 +2286,13 @@ class PhaseParameters {
         return `PhaseParameters(${result})`;
     }
 }
-
 // export { DataValue as DataValue, GenericData as GenericData, Json as Json, SemanticData as SemanticData };
 // export { Instruction as Instruction, Data as Data, Return as Return, Sequence as Sequence, Goto as Goto, Call as Call, Fault as Fault, Try as Try };
 // export { Script as Script };
 // export { PhaseParameters as PhaseParameters };
-// export const MESSAGE_VERSION = '0.9.10';
+// export const MESSAGE_VERSION = '1.0.0';
 
-const MESSAGE_VERSION = '0.9.10';
+const MESSAGE_VERSION = '1.0.0';
 
 // end qworum-messages-*.mjs
 
@@ -2305,482 +2304,482 @@ const MESSAGE_VERSION = '0.9.10';
  * and the 🚀 sign is for functions that call the Qworum browser extension. 
  */
 class Qworum {
-  /**
-   * Not used.
-   */
-  constructor() { }
+    /**
+     * Not used.
+     */
+    constructor() { }
 
 
-  /** 
-   * Implementation version. 
-   * @static
-   */
-  static version = '0.9.10';
+    /** 
+     * Implementation version. 
+     * @static
+     */
+    static version = '1.0.0';
 
-  /** 
-   * Qworum message classes. 
-   * @static
-   */
-  static message = {
-    GenericData, DataValue, Json, SemanticData,
-    Instruction, Data, Return, Sequence, Goto, Call, Fault, Try,
-    Script,
-    PhaseParameters
-  };
-
-  /** 
-   * 📝 Builder for Qworum scripts. 
-   * @function Qworum.Script
-   * @static
-   * @param {Qworum.message.Instruction} instruction - The instruction to execute.
-   * @returns {Qworum.message.Script}
-   * @example
-   * const script = Qworum.Script(
-   *   Qworum.Sequence(
-   *     // Show the user's shopping cart
-   *     Qworum.Call(["@", "shopping cart"], "https://shopping-cart.example/view/")
-   * 
-   *     // Go back to the current e-shop
-   *     Qworum.Goto("/home/")
-   *   )
-   * );
-   * @see <https://qworum.net/en/specification/v1/#script>
-   */
-  static Script = Qworum.message.Script.build;
-
-  /** 
-   * 📝 Builder for Call instructions. 
-   * @function Qworum.Call
-   * @static
-   * @param {(string[] | string | null | undefined)} object - The path of the Qworum object to call.
-   * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
-   * @param {(object | object[] | null | undefined)} arguments - Named data value arguments.
-   * @param {(object | object[] | null | undefined)} objectArguments - Named Qworum object arguments.
-   * @throws {Error}
-   * @returns {Qworum.message.Call}
-   * @example
-   * // Example 1
-   * const call1 = Qworum.Call('@', 'home/');
-   * // Example 2
-   * const call2 = Qworum.Call(
-   *   '@', 'home/', 
-   *   {name: 'current year', value: Qworum.Json(2022)}
-   * );
-   * // Example 3
-   * const call3 = Qworum.Call(
-   *   ['@'], 'home/',
-   *   [{name: 'current year', value: Qworum.Json(2022)}],
-   *   [{name: , object: ['@', 'a Qworum object']}]
-   * );
-   * @see <https://qworum.net/en/specification/v1/#call>
-   */
-  static Call = Qworum.message.Call.build;
-
-  /** Builder function for Return instructions. */
-
-  /** 
-   * 📝 Builder for Goto instructions. 
-   * @function Qworum.Goto
-   * @static
-   * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
-   * @throws {Error}
-   * @returns {Qworum.message.Goto}
-   * @example
-   * const goto = Qworum.Goto(
-   *   ['@'], 'home/'
-   * );
-   * @see <https://qworum.net/en/specification/v1/#goto>
-   */
-  static Goto = Qworum.message.Goto.build;
-
-  /** 
-   * 📝 Builder for Return instructions. 
-   * @function Qworum.Return
-   * @static
-   * @param {(Qworum.message.DataValue | Qworum.message.Instruction)} statement - The instruction or data value to evaluate.
-   * @throws {Error}
-   * @returns {Qworum.message.Return}
-   * @example
-   * const return1 = Qworum.Return(Qworum.Json(2022));
-   * @see <https://qworum.net/en/specification/v1/#return>
-   */
-  static Return = Qworum.message.Return.build;
-
-  /** 
-   * 📝 Builder for Sequence instructions. 
-   * @function Qworum.Sequence
-   * @static
-   * @param A statement (instruction or data value) or a non-empty array of statements.
-   * @throws {Error}
-   * @returns {Qworum.message.Sequence}
-   * @example
-   * const sequence = Qworum.Sequence(Qworum.Json(2022));
-   * @see <https://qworum.net/en/specification/v1/#sequence>
-   */
-  static Sequence = Qworum.message.Sequence.build;
-
-  /** 
-   * 📝 Builder for Fault instructions. 
-   * @function Qworum.Fault
-   * @static
-   * @param {(string | undefined)} type - The type of the raised fault.
-   * @throws {Error}
-   * @returns {Qworum.message.Fault}
-   * @example
-   * const fault = Qworum.Fault('* the valve is jammed');
-   * @see <https://qworum.net/en/specification/v1/#fault>
-   */
-  static Fault = Qworum.message.Fault.build;
-
-  /** 
-   * 📝 Builder function for Try instructions.
-   * @function Qworum.Try
-   * @static
-   * @param statement - A statement (instruction or data value) or a non-empty array of statements.
-   * @param catchClauses - One catch clause or an array of catch clauses.
-   * @throws {Error}
-   * @returns {Qworum.message.Try} 
-   * @example
-   * const try1 = Qworum.Try(
-   *   Qworum.Call('@', 'checkout/'), 
-   *   [
-   *     {catch: ['* the cart is empty'], Json({})}
-   *   ]
-   * );
-   * @see <https://qworum.net/en/specification/v1/#try>
-   */
-  static Try = Qworum.message.Try.build;
-
-  /** Builder function for Data instructions. */
-
-  /** 
-   * 📝 Builder for Data instructions. 
-   * @function Qworum.Data
-   * @static
-   * @param {string | string[]} path - The path of the data container.
-   * @param {(Qworum.message.DataValue | Qworum.message.Instruction | undefined)} statement - An instruction or data value.
-   * @throws {Error}
-   * @returns {Qworum.message.Data}
-   * @example
-   * const
-   * // Instruction for setting the value of a data container
-   * data1 = Qworum.Data('data1', Qworum.Json(2022)),
-   * // Instruction for reading the value of the data container
-   * data2 = Qworum.Data('data1');
-   * @see <https://qworum.net/en/specification/v1/#data>
-   */
-  static Data = Qworum.message.Data.build;
-
-  /** 
-   * 📝 Builder for Json data values. 
-   * @function Qworum.Json
-   * @static
-   * @param value - A value that can be serialized to JSON.
-   * @throws {Error}
-   * @returns {Qworum.message.Json}
-   * @example
-   * const json = Qworum.Json(2022);
-   * @see <https://qworum.net/en/specification/v1/#json>
-   */
-  static Json = Qworum.message.Json.build;
-
-  /** Builder function for SemanticData data values. */
-
-  /** 
-   * 📝 Builder for semantic data values. 
-   * @function Qworum.SemanticData
-   * @static
-   * @param {string} value - The semantic data value.
-   * @param {string | undefined} type - The type of the semantic data value. One of 'json-ld', 'n-quads'.
-   * @throws {Error}
-   * @returns {Qworum.message.SemanticData}
-   * @example
-   * const json = Qworum.SemanticData(`{
-   *   "@context"  : {"@vocab": "https://schema.org/"},
-   *   "@id"       : "https://www.wikidata.org/wiki/Q92760",
-   *   "@type"     : "Person",
-   *   "givenName" : "Claude",
-   *   "familyName": "Shannon",
-   *   "birthDate" : "1916-04-30"
-   * }`);
-   * @see <https://qworum.net/en/specification/v1/#semantic>
-   */
-  static SemanticData = Qworum.message.SemanticData.build;
-
-  static init() {
-    // TODO remove this when the extension's content script can do window.history.forward() reliably
-    this._sendMessage(
-      { type: '[Web page API v1] in session?' },
-      function (response) {
-        if (!response.inSession) return;
-        window.history.forward();
-      }
-    );
-
-  }
-
-  /** 
-   * 🚀 Checks that the Qworum browser extension is installed and running.
-   * @static
-   * @param callback - A function that is executed when/if the Qworum browser extension pings back.
-   * @throws {Error}
-   * @example
-   * Qworum.ping(() => console.log('The Qworum browser extension is running.'));
-   */
-  static ping(callback) {
-    this._sendMessage(
-      { type: '[Web page API v1] ping' }, callback
-    )
-  }
-
-  // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
-
-  /**
-   * Profile of functions that are callback parameters for Qworum.setData().
-   * @callback setDataCallback
-   * @param {boolean} success - True if data was written.
-   * @param {string[] | string} path - The path of the data container.
-   * @param {Json | SemanticData} newValue
-   */
-
-  /** 
-   * 🚀 Sets the value contained in a data container.
-   * @static
-   * @param {string[] | string} path - The path of the data container.
-   * @param {Qworum.message.Json | Qworum.message.SemanticData} newValue
-   * @param {setDataCallback} callback
-   * @throws {Error}
-   * @example
-   * Qworum.setData('current year', Qworum.Json(2022), () => console.log('The write operation was successful.'));
-   * @see <https://qworum.net/en/specification/v1/#data>
-   */
-  static setData(path, newValue, callback) {
-    this._log(`[setData] `);
-    // validate path
-    if(typeof path === 'string')path = [path];
-    if(!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
-    // validate newValue
-    if(!(
-      newValue && 
-      [Qworum.message.Json, Qworum.message.SemanticData].find(dataType => (newValue instanceof dataType))
-    )) throw new Error('invalid value');
-
-    // set 
-    this._sendMessage(
-      { type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() },
-      (response) => {
-        if(typeof callback !== 'function') return;
-        if (response.status !== 200) {
-          callback(false, path, newValue); return;
-        }
-        callback(true, path, newValue);
-      }
-    )
-  }
-
-  /**
-   * Profile of functions that are callback parameters for Qworum.getData().
-   * @callback getDataCallback
-   * @param {null | Qworum.message.Json | Qworum.message.SemanticData} value - The value of the data container.
-   * @param {string[]} path - The path of the data container.
-   */
-
-  /** 
-   * 🚀 Reads the value contained in a data container.
-   * @static
-   * @param {string[] | string} path - The path of the data container.
-   * @param {getDataCallback} callback
-   * @throws {Error}
-   * @example
-   * Qworum.getData('current year', (json) => console.log(`Year: ${json.value}`));
-   * @see <https://qworum.net/en/specification/v1/#data>
-   */
-  static getData(path, callback) { // TODO add new function: static getMultipleData(paths, callback)
-    this._log(`[getData] `);
-    if(typeof path === 'string')path = [path];
-    if(!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
-
-    this._sendMessage(
-      { type: '[Web page API v1] get data', path },
-      (response) => {
-        let value = null;
-        if (response.status !== 200) {
-          callback(value, path); return;
-        }
-        try {
-          value = Qworum.message.Json.fromIndexedDb(response.body);
-        } catch (error) {
-          try {
-            value = Qworum.message.SemanticData.fromIndexedDb(response.body);
-          } catch (error) {
-          }
-        }
-        if(typeof callback !== 'function') return;
-        callback(value, path);
-      }
-    )
-  }
-
-  /**
-   * Profile of functions that are callback parameters for Qworum.eval().
-   * @callback evalCallback
-   * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataValueOrFault
-   */
-
-  /** 
-   * 🚀 Evaluates a Qworum script.
-   * @static
-   * @param {Qworum.message.Script} script
-   * @param {evalCallback} callback
-   * @throws {Error}
-   * @example
-   * Qworum.eval(Script(Fault()));
-   * @see <https://qworum.net/en/specification/v1/#script>
-   */
-  static eval(script, callback) { // TODO send script in JSON format, remove XML library from this module
-    this._log(`[eval] `); 
-    if(!script)return;
-
-    const xmlString = script.toXml();
-    this._log(`[eval] script: ${xmlString}`);
-    this._sendMessage(
-      { type: '[Web page API v1] eval xml script', script: xmlString },
-      (msg) => { 
-        Qworum._log(`[eval] received: ${JSON.stringify(msg)}`);
-        if(msg.status !== 200)return;
-
-        // eval yielded a web request, execute it
-        if (msg.body.webRequest) {
-          const webRequest = msg.body.webRequest;
-          if (webRequest.phaseParameters) {
-            Qworum._log('must make an HTTP(S) POST request, using a form');
-
-            const 
-            XhtmlNamespace = 'http://www.w3.org/1999/xhtml',
-            form                 = document.createElementNS(XhtmlNamespace, 'form'),
-            // submitButton         = document.createElementNS(XhtmlNamespace, 'input'),
-            phaseParametersInput = document.createElementNS(XhtmlNamespace, 'input');
-
-            form.setAttribute('id', 'qworum-form');
-            form.setAttribute('name', 'qworum-form');
-            form.method = 'POST';
-            form.action = webRequest.url;
-            // form.setAttribute('method', 'post');
-            // form.setAttribute('action', webRequest.url);
-            
-            // submitButton.setAttribute('type', 'button');
-            // submitButton.setAttribute('id', 'qworum-submit'); // no needed ?
-            // submitButton.setAttribute('name', 'qworum-submit');
-            // submitButton.setAttribute('value', 'submit');
-            // form.appendChild(submitButton);
-
-            phaseParametersInput.setAttribute('id', 'qworum-phase-parameters'); // not needed?
-            phaseParametersInput.setAttribute('name', 'qworum-phase-parameters');
-            phaseParametersInput.setAttribute('value', webRequest.phaseParameters);
-            phaseParametersInput.setAttribute('type', 'hidden');
-            form.appendChild(phaseParametersInput);
-
-            document.body.appendChild(form);
-
-            // alert('sending the POST request ...');
-            form.submit();
-            // document.forms[0].submit();
-            // document.forms['qworum-form'].submit();
-            // document.getElementById('qworum-form').submit();
-          } else {
-            Qworum._log('must make an HTTP(S) GET request; redirecting');
-            window.location.replace(webRequest.url);
-          }
-
-        // eval terminated the Qworum session normally, inform the end user
-        } else {
-          // eval terminated the Qworum session normally
-          let result;
-          if (msg.body.data) {
-            Qworum._log('service worker response is data');
-            for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
-              try {
-                result = DataType.fromIndexedDb(msg.body.data);
-              } catch (error) {}
-              if(result)break;
-            }
-            if (result) {
-              alert(`The application has terminated normally. Returned data: ${JSON.stringify(result.value)}`);
-              // window.close(); // Scripts may close only the windows that were opened by them.
-            } else {
-              Qworum._log('error: unrecognised data');
-              result = Qworum.Fault('runtime');
-            }
-          }
-
-          if (msg.body.fault) {
-            try {
-              result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
-            } catch (error) {
-              Qworum._log('error: unrecognised fault');
-              result = Qworum.Fault('runtime');
-            }
-            Qworum._log('service worker response is a fault');
-            alert(`The application has terminated with a "${result.type}" fault.`);
-            // window.close(); // Scripts may close only the windows that were opened by them.
-          }
-
-          if (callback) callback(result);
-        }
-
-      }
-    )
-  }
-
-  static _sendMessage(message, callback) {
-    const browserExtensionInfo = Qworum.getBrowserExtensionInfo();
-    this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
-    this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
-
-    try {
-      if (browserExtensionInfo.browserType === 'chrome') {
-        chrome.runtime.sendMessage(
-          browserExtensionInfo.extensionId,
-          message,
-
-          function (response) {
-            if(!response)throw new Error('The Qworum extension is not installed or is disabled.');
-            // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
-            console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
-            if (typeof callback === 'function') callback(response);
-          }
-        );
-      }
-    } catch (error) {
-        this._log('The Qworum extension is not installed or is disabled.');
-    }
-
-}
-
-  // Returns a non-null value if there is a Qworum extension for this browser.
-  // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website !!!
-  static getBrowserExtensionInfo() {
-    // extension ids for all supported browsers
-    const browserExtensionIds = {
-      // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
-      // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...
-      chrome: 'lmikadfjgkcdcndneebdmkngidngaaab'
+    /** 
+     * Qworum message classes. 
+     * @static
+     */
+    static message = {
+        GenericData, DataValue, Json, SemanticData,
+        Instruction, Data, Return, Sequence, Goto, Call, Fault, Try,
+        Script,
+        PhaseParameters
     };
 
-    // extension info for this browser
-    let browserExtensionInfo = null, browserType = null;
-    if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
-      // this browser is compatible with Chrome Web Store
-      browserType = 'chrome';
-      browserExtensionInfo = { browserType, extensionId: browserExtensionIds[browserType] };
-    }
-    if (!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported by Qworum.');
-    return browserExtensionInfo;
-  }
+    /** 
+     * 📝 Builder for Qworum scripts. 
+     * @function Qworum.Script
+     * @static
+     * @param {Qworum.message.Instruction} instruction - The instruction to execute.
+     * @returns {Qworum.message.Script}
+     * @example
+     * const script = Qworum.Script(
+     *   Qworum.Sequence(
+     *     // Show the user's shopping cart
+     *     Qworum.Call(["@", "shopping cart"], "https://shopping-cart.example/view/")
+     * 
+     *     // Go back to the current e-shop
+     *     Qworum.Goto("/home/")
+     *   )
+     * );
+     * @see <https://qworum.net/en/specification/v1/#script>
+     */
+    static Script = Qworum.message.Script.build;
 
-  static _log(message) {
-    console.log(`[Qworum for web pages] ${message}`);
-  }
+    /** 
+     * 📝 Builder for Call instructions. 
+     * @function Qworum.Call
+     * @static
+     * @param {(string[] | string | null | undefined)} object - The path of the Qworum object to call.
+     * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
+     * @param {(object | object[] | null | undefined)} arguments - Named data value arguments.
+     * @param {(object | object[] | null | undefined)} objectArguments - Named Qworum object arguments.
+     * @throws {Error}
+     * @returns {Qworum.message.Call}
+     * @example
+     * // Example 1
+     * const call1 = Qworum.Call('@', 'home/');
+     * // Example 2
+     * const call2 = Qworum.Call(
+     *   '@', 'home/', 
+     *   {name: 'current year', value: Qworum.Json(2022)}
+     * );
+     * // Example 3
+     * const call3 = Qworum.Call(
+     *   ['@'], 'home/',
+     *   [{name: 'current year', value: Qworum.Json(2022)}],
+     *   [{name: , object: ['@', 'a Qworum object']}]
+     * );
+     * @see <https://qworum.net/en/specification/v1/#call>
+     */
+    static Call = Qworum.message.Call.build;
+
+    /** Builder function for Return instructions. */
+
+    /** 
+     * 📝 Builder for Goto instructions. 
+     * @function Qworum.Goto
+     * @static
+     * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
+     * @throws {Error}
+     * @returns {Qworum.message.Goto}
+     * @example
+     * const goto = Qworum.Goto(
+     *   ['@'], 'home/'
+     * );
+     * @see <https://qworum.net/en/specification/v1/#goto>
+     */
+    static Goto = Qworum.message.Goto.build;
+
+    /** 
+     * 📝 Builder for Return instructions. 
+     * @function Qworum.Return
+     * @static
+     * @param {(Qworum.message.DataValue | Qworum.message.Instruction)} statement - The instruction or data value to evaluate.
+     * @throws {Error}
+     * @returns {Qworum.message.Return}
+     * @example
+     * const return1 = Qworum.Return(Qworum.Json(2022));
+     * @see <https://qworum.net/en/specification/v1/#return>
+     */
+    static Return = Qworum.message.Return.build;
+
+    /** 
+     * 📝 Builder for Sequence instructions. 
+     * @function Qworum.Sequence
+     * @static
+     * @param A statement (instruction or data value) or a non-empty array of statements.
+     * @throws {Error}
+     * @returns {Qworum.message.Sequence}
+     * @example
+     * const sequence = Qworum.Sequence(Qworum.Json(2022));
+     * @see <https://qworum.net/en/specification/v1/#sequence>
+     */
+    static Sequence = Qworum.message.Sequence.build;
+
+    /** 
+     * 📝 Builder for Fault instructions. 
+     * @function Qworum.Fault
+     * @static
+     * @param {(string | undefined)} type - The type of the raised fault.
+     * @throws {Error}
+     * @returns {Qworum.message.Fault}
+     * @example
+     * const fault = Qworum.Fault('* the valve is jammed');
+     * @see <https://qworum.net/en/specification/v1/#fault>
+     */
+    static Fault = Qworum.message.Fault.build;
+
+    /** 
+     * 📝 Builder function for Try instructions.
+     * @function Qworum.Try
+     * @static
+     * @param statement - A statement (instruction or data value) or a non-empty array of statements.
+     * @param catchClauses - One catch clause or an array of catch clauses.
+     * @throws {Error}
+     * @returns {Qworum.message.Try} 
+     * @example
+     * const try1 = Qworum.Try(
+     *   Qworum.Call('@', 'checkout/'), 
+     *   [
+     *     {catch: ['* the cart is empty'], Json({})}
+     *   ]
+     * );
+     * @see <https://qworum.net/en/specification/v1/#try>
+     */
+    static Try = Qworum.message.Try.build;
+
+    /** Builder function for Data instructions. */
+
+    /** 
+     * 📝 Builder for Data instructions. 
+     * @function Qworum.Data
+     * @static
+     * @param {string | string[]} path - The path of the data container.
+     * @param {(Qworum.message.DataValue | Qworum.message.Instruction | undefined)} statement - An instruction or data value.
+     * @throws {Error}
+     * @returns {Qworum.message.Data}
+     * @example
+     * const
+     * // Instruction for setting the value of a data container
+     * data1 = Qworum.Data('data1', Qworum.Json(2022)),
+     * // Instruction for reading the value of the data container
+     * data2 = Qworum.Data('data1');
+     * @see <https://qworum.net/en/specification/v1/#data>
+     */
+    static Data = Qworum.message.Data.build;
+
+    /** 
+     * 📝 Builder for Json data values. 
+     * @function Qworum.Json
+     * @static
+     * @param value - A value that can be serialized to JSON.
+     * @throws {Error}
+     * @returns {Qworum.message.Json}
+     * @example
+     * const json = Qworum.Json(2022);
+     * @see <https://qworum.net/en/specification/v1/#json>
+     */
+    static Json = Qworum.message.Json.build;
+
+    /** Builder function for SemanticData data values. */
+
+    /** 
+     * 📝 Builder for semantic data values. 
+     * @function Qworum.SemanticData
+     * @static
+     * @param {string} value - The semantic data value.
+     * @param {string | undefined} type - The type of the semantic data value. One of 'json-ld', 'n-quads'.
+     * @throws {Error}
+     * @returns {Qworum.message.SemanticData}
+     * @example
+     * const json = Qworum.SemanticData(`{
+     *   "@context"  : {"@vocab": "https://schema.org/"},
+     *   "@id"       : "https://www.wikidata.org/wiki/Q92760",
+     *   "@type"     : "Person",
+     *   "givenName" : "Claude",
+     *   "familyName": "Shannon",
+     *   "birthDate" : "1916-04-30"
+     * }`);
+     * @see <https://qworum.net/en/specification/v1/#semantic>
+     */
+    static SemanticData = Qworum.message.SemanticData.build;
+
+    static init() {
+        // TODO remove this when the extension's content script can do window.history.forward() reliably
+        this._sendMessage(
+            { type: '[Web page API v1] in session?' },
+            function (response) {
+                if (!response.inSession) return;
+                window.history.forward();
+            }
+        );
+
+    }
+
+    /** 
+     * 🚀 Checks that the Qworum browser extension is installed and running.
+     * @static
+     * @param callback - A function that is executed when/if the Qworum browser extension pings back.
+     * @throws {Error}
+     * @example
+     * Qworum.ping(() => console.log('The Qworum browser extension is running.'));
+     */
+    static ping(callback) {
+        this._sendMessage(
+            { type: '[Web page API v1] ping' }, callback
+        )
+    }
+
+    // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
+
+    /**
+     * Profile of functions that are callback parameters for Qworum.setData().
+     * @callback setDataCallback
+     * @param {boolean} success - True if data was written.
+     * @param {string[] | string} path - The path of the data container.
+     * @param {Json | SemanticData} newValue
+     */
+
+    /** 
+     * 🚀 Sets the value contained in a data container.
+     * @static
+     * @param {string[] | string} path - The path of the data container.
+     * @param {Qworum.message.Json | Qworum.message.SemanticData} newValue
+     * @param {setDataCallback} callback
+     * @throws {Error}
+     * @example
+     * Qworum.setData('current year', Qworum.Json(2022), () => console.log('The write operation was successful.'));
+     * @see <https://qworum.net/en/specification/v1/#data>
+     */
+    static setData(path, newValue, callback) {
+        this._log(`[setData] `);
+        // validate path
+        if (typeof path === 'string') path = [path];
+        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+        // validate newValue
+        if (!(
+            newValue &&
+            [Qworum.message.Json, Qworum.message.SemanticData].find(dataType => (newValue instanceof dataType))
+        )) throw new Error('invalid value');
+
+        // set 
+        this._sendMessage(
+            { type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() },
+            (response) => {
+                if (typeof callback !== 'function') return;
+                if (response.status !== 200) {
+                    callback(false, path, newValue); return;
+                }
+                callback(true, path, newValue);
+            }
+        )
+    }
+
+    /**
+     * Profile of functions that are callback parameters for Qworum.getData().
+     * @callback getDataCallback
+     * @param {null | Qworum.message.Json | Qworum.message.SemanticData} value - The value of the data container.
+     * @param {string[]} path - The path of the data container.
+     */
+
+    /** 
+     * 🚀 Reads the value contained in a data container.
+     * @static
+     * @param {string[] | string} path - The path of the data container.
+     * @param {getDataCallback} callback
+     * @throws {Error}
+     * @example
+     * Qworum.getData('current year', (json) => console.log(`Year: ${json.value}`));
+     * @see <https://qworum.net/en/specification/v1/#data>
+     */
+    static getData(path, callback) { // TODO add new function: static getMultipleData(paths, callback)
+        this._log(`[getData] `);
+        if (typeof path === 'string') path = [path];
+        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+
+        this._sendMessage(
+            { type: '[Web page API v1] get data', path },
+            (response) => {
+                let value = null;
+                if (response.status !== 200) {
+                    callback(value, path); return;
+                }
+                try {
+                    value = Qworum.message.Json.fromIndexedDb(response.body);
+                } catch (error) {
+                    try {
+                        value = Qworum.message.SemanticData.fromIndexedDb(response.body);
+                    } catch (error) {
+                    }
+                }
+                if (typeof callback !== 'function') return;
+                callback(value, path);
+            }
+        )
+    }
+
+    /**
+     * Profile of functions that are callback parameters for Qworum.eval().
+     * @callback evalCallback
+     * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataValueOrFault
+     */
+
+    /** 
+     * 🚀 Evaluates a Qworum script.
+     * @static
+     * @param {Qworum.message.Script} script
+     * @param {evalCallback} callback
+     * @throws {Error}
+     * @example
+     * Qworum.eval(Script(Fault()));
+     * @see <https://qworum.net/en/specification/v1/#script>
+     */
+    static eval(script, callback) { // TODO send script in JSON format, remove XML library from this module
+        this._log(`[eval] `);
+        if (!script) return;
+
+        const xmlString = script.toXml();
+        this._log(`[eval] script: ${xmlString}`);
+        this._sendMessage(
+            { type: '[Web page API v1] eval xml script', script: xmlString },
+            (msg) => {
+                Qworum._log(`[eval] received: ${JSON.stringify(msg)}`);
+                if (msg.status !== 200) return;
+
+                // eval yielded a web request, execute it
+                if (msg.body.webRequest) {
+                    const webRequest = msg.body.webRequest;
+                    if (webRequest.phaseParameters) {
+                        Qworum._log('must make an HTTP(S) POST request, using a form');
+
+                        const
+                            XhtmlNamespace = 'http://www.w3.org/1999/xhtml',
+                            form = document.createElementNS(XhtmlNamespace, 'form'),
+                            // submitButton         = document.createElementNS(XhtmlNamespace, 'input'),
+                            phaseParametersInput = document.createElementNS(XhtmlNamespace, 'input');
+
+                        form.setAttribute('id', 'qworum-form');
+                        form.setAttribute('name', 'qworum-form');
+                        form.method = 'POST';
+                        form.action = webRequest.url;
+                        // form.setAttribute('method', 'post');
+                        // form.setAttribute('action', webRequest.url);
+
+                        // submitButton.setAttribute('type', 'button');
+                        // submitButton.setAttribute('id', 'qworum-submit'); // no needed ?
+                        // submitButton.setAttribute('name', 'qworum-submit');
+                        // submitButton.setAttribute('value', 'submit');
+                        // form.appendChild(submitButton);
+
+                        phaseParametersInput.setAttribute('id', 'qworum-phase-parameters'); // not needed?
+                        phaseParametersInput.setAttribute('name', 'qworum-phase-parameters');
+                        phaseParametersInput.setAttribute('value', webRequest.phaseParameters);
+                        phaseParametersInput.setAttribute('type', 'hidden');
+                        form.appendChild(phaseParametersInput);
+
+                        document.body.appendChild(form);
+
+                        // alert('sending the POST request ...');
+                        form.submit();
+                        // document.forms[0].submit();
+                        // document.forms['qworum-form'].submit();
+                        // document.getElementById('qworum-form').submit();
+                    } else {
+                        Qworum._log('must make an HTTP(S) GET request; redirecting');
+                        window.location.replace(webRequest.url);
+                    }
+
+                    // eval terminated the Qworum session normally, inform the end user
+                } else {
+                    // eval terminated the Qworum session normally
+                    let result;
+                    if (msg.body.data) {
+                        Qworum._log('service worker response is data');
+                        for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
+                            try {
+                                result = DataType.fromIndexedDb(msg.body.data);
+                            } catch (error) { }
+                            if (result) break;
+                        }
+                        if (result) {
+                            alert(`The application has terminated normally. Returned data: ${JSON.stringify(result.value)}`);
+                            // window.close(); // Scripts may close only the windows that were opened by them.
+                        } else {
+                            Qworum._log('error: unrecognised data');
+                            result = Qworum.Fault('runtime');
+                        }
+                    }
+
+                    if (msg.body.fault) {
+                        try {
+                            result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
+                        } catch (error) {
+                            Qworum._log('error: unrecognised fault');
+                            result = Qworum.Fault('runtime');
+                        }
+                        Qworum._log('service worker response is a fault');
+                        alert(`The application has terminated with a "${result.type}" fault.`);
+                        // window.close(); // Scripts may close only the windows that were opened by them.
+                    }
+
+                    if (callback) callback(result);
+                }
+
+            }
+        )
+    }
+
+    static _sendMessage(message, callback) {
+        const browserExtensionInfo = Qworum.getBrowserExtensionInfo();
+        this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
+        this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
+
+        try {
+            if (browserExtensionInfo.browserType === 'chrome') {
+                chrome.runtime.sendMessage(
+                    browserExtensionInfo.extensionId,
+                    message,
+
+                    function (response) {
+                        if (!response) throw new Error('The Qworum extension is not installed or is disabled.');
+                        // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
+                        //            console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
+                        if (typeof callback === 'function') callback(response);
+                    }
+                );
+            }
+        } catch (error) {
+            this._log('The Qworum extension is not installed or is disabled.');
+        }
+
+    }
+
+    // Returns a non-null value if there is a Qworum extension for this browser.
+    // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website !!!
+    static getBrowserExtensionInfo() {
+        // extension ids for all supported browsers
+        const browserExtensionIds = {
+            // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
+            // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...
+            chrome: 'lmikadfjgkcdcndneebdmkngidngaaab'
+        };
+
+        // extension info for this browser
+        let browserExtensionInfo = null, browserType = null;
+        if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+            // this browser is compatible with Chrome Web Store
+            browserType = 'chrome';
+            browserExtensionInfo = { browserType, extensionId: browserExtensionIds[browserType] };
+        }
+        if (!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported by Qworum.');
+        return browserExtensionInfo;
+    }
+
+    static _log(message) {
+        //    console.log(`[Qworum for web pages] ${message}`);
+    }
 }
 
 // Qworum.init();

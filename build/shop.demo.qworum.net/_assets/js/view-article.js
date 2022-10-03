@@ -1,24 +1,24 @@
 // Qworum library
 import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
-console.log(`Qworum.version: ${Qworum.version}`);
+//console.log(`Qworum.version: ${Qworum.version}`);
 const
-// Qworum Data value types
-Json         = Qworum.Json,
-SemanticData = Qworum.SemanticData,
-// Qworum instructions
-Data         = Qworum.Data,
-Return       = Qworum.Return,
-Sequence     = Qworum.Sequence,
-Goto         = Qworum.Goto,
-Call         = Qworum.Call,
-Fault        = Qworum.Fault,
-Try          = Qworum.Try,
-// Qworum script
-Script       = Qworum.Script;
+  // Qworum Data value types
+  Json = Qworum.Json,
+  SemanticData = Qworum.SemanticData,
+  // Qworum instructions
+  Data = Qworum.Data,
+  Return = Qworum.Return,
+  Sequence = Qworum.Sequence,
+  Goto = Qworum.Goto,
+  Call = Qworum.Call,
+  Fault = Qworum.Fault,
+  Try = Qworum.Try,
+  // Qworum script
+  Script = Qworum.Script;
 
 // Application data
 import { articles } from "./modules/articles.mjs";
-console.log(`articles: ${JSON.stringify(articles)}`);
+//console.log(`articles: ${JSON.stringify(articles)}`);
 
 // Web components
 import { MyArticle } from "./modules/web-components/article.mjs";
@@ -54,14 +54,14 @@ function displayCartTotal() {
 function displayTheArticleOnSale(articleId) {
   // alert(`article id: ${articleId}`);
   const
-  contentArea     = document.getElementById('content'),
-  addToCartButton = document.getElementById('add-to-cart-button'),
-  homepageButton  = document.getElementById('homepage-button'),
-  article         = {
-    id     : articleId,
-    data   : articles[articleId],
-    element: document.createElement('my-article')
-  };
+    contentArea = document.getElementById('content'),
+    addToCartButton = document.getElementById('add-to-cart-button'),
+    homepageButton = document.getElementById('homepage-button'),
+    article = {
+      id: articleId,
+      data: articles[articleId],
+      element: document.createElement('my-article')
+    };
 
   article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
   article.element.setAttribute('description', article.data.description);
@@ -72,13 +72,13 @@ function displayTheArticleOnSale(articleId) {
     Qworum.eval(Script(
       Sequence(
         Call(
-          ['@', 'shopping cart'], '/build/cart.demo.qworum.net/add-items/', 
+          ['@', 'shopping cart'], '/build/cart.demo.qworum.net/add-items/',
           [{
-            name: 'line items to add', 
+            name: 'line items to add',
             value: Json([{
               // article: {
               // }, 
-              id   : article.id,
+              id: article.id,
               title: article.data.title,
               price: article.data.price,
               count: 1,
