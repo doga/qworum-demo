@@ -19,5 +19,7 @@ body {
   font-weight: bolder;
 }
 
-
+button:hover {
+  cursor:pointer;
+}
 

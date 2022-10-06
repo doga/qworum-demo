@@ -28,48 +28,50 @@ window.customElements.define('my-site-banner', MySiteBanner);
 
 // UI
 
-Qworum.getData('article id', (articleId) => {
+show();
+
+async function show() {
+  let articleId = await Qworum.getData('article id');
   if (!(articleId && articleId instanceof Qworum.message.Json && articles[articleId.value])) {
-    Qworum.eval(Script(
+    await Qworum.eval(Script(
       Fault('* the "article id" call parameter is missing or invalid')
     ));
     return;
   }
-  displayTheArticleOnSale(articleId.value);
-  displayCartTotal();
-});
-
-function displayCartTotal() {
-  Qworum.getData(['@', 'shopping cart', 'total'], (total) => {
-    if (total instanceof Qworum.message.Json) {
-      total = total.value.EUR;
-    } else {
-      total = 0.0;
-    }
-
-    document.querySelector('#banner').setAttribute('cart-total', `${total}`);
-  });
+  await displayTheArticleOnSale(articleId.value);
+  await displayCartTotal();
 }
 
-function displayTheArticleOnSale(articleId) {
+async function displayCartTotal() {
+  let total = await Qworum.getData(['@', 'shopping cart', 'total']);
+  if (total instanceof Qworum.message.Json) {
+    total = total.value.EUR;
+  } else {
+    total = 0.0;
+  }
+
+  document.querySelector('#banner').setAttribute('cart-total', `${total}`);
+}
+
+async function displayTheArticleOnSale(articleId) {
   // alert(`article id: ${articleId}`);
   const
-    contentArea = document.getElementById('content'),
-    addToCartButton = document.getElementById('add-to-cart-button'),
-    homepageButton = document.getElementById('homepage-button'),
-    article = {
-      id: articleId,
-      data: articles[articleId],
-      element: document.createElement('my-article')
-    };
+  contentArea     = document.getElementById('content'),
+  addToCartButton = document.getElementById('add-to-cart-button'),
+  homepageButton  = document.getElementById('homepage-button'),
+  article         = {
+    id     : articleId,
+    data   : articles[articleId],
+    element: document.createElement('my-article')
+  };
 
   article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
   article.element.setAttribute('description', article.data.description);
   contentArea.append(article.element);
 
-  addToCartButton.addEventListener('click', () => {
+  addToCartButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    Qworum.eval(Script(
+    await Qworum.eval(Script(
       Sequence(
         Call(
           ['@', 'shopping cart'], '@@cart/add-items/',
@@ -90,9 +92,9 @@ function displayTheArticleOnSale(articleId) {
     ));
   });
 
-  homepageButton.addEventListener('click', () => {
+  homepageButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    Qworum.eval(Script(
+    await Qworum.eval(Script(
       Return(Json(0))
     ));
   });

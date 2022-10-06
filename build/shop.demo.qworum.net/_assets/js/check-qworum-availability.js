@@ -20,13 +20,16 @@ const
 
 //console.log(`Qworum.version: ${Qworum.version}`);
 
-try {
-  Qworum.ping(() => {
-    //    console.log(`The Qworum browser extension is running !`);
+checkQworumAvailability();
 
-    // Execute a Qworum script
-    // (See https://qworum.net/en/specification/v1/#script)
-    Qworum.eval(
+async function checkQworumAvailability() {
+  try {
+    await Qworum.ping();
+    console.log(`The Qworum browser extension is running !`);
+  
+      // Execute a Qworum script
+      // (See https://qworum.net/en/specification/v1/#script)
+    await Qworum.eval(
       Script(
         // Call the `home` end-point
         Call('@', 'home/')
@@ -35,10 +38,11 @@ try {
         // Return(Json('test value'))
       )
     );
-  });
-} catch (error) {
-  //  console.log(`Error: ${error}`);
-
-  // Ask the end-user to install Qworum
-  document.querySelector('.hide').className = 'show';
+  } catch (error) {
+    console.log(`Error: ${error}`);
+  
+    // Ask the end-user to install Qworum
+    document.querySelector('.hide').className = 'show';
+  }
+  
 }

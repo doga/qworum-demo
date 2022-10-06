@@ -19,6 +19,7 @@ class MyCheckoutButton extends HTMLElement {
           font-size: larger;
           margin-left: 5em;
           padding: 0.5em 2em;
+          cursor:pointer;
         }
       </style>
       <button id='button'>
@@ -31,7 +32,7 @@ class MyCheckoutButton extends HTMLElement {
 
   handleClick(event) {
     // if(!this.article)return;
-    window.location.href = 'checkout.qrm.xml';
+    // window.location.href = 'checkout.qrm.xml';
   }
 
   // manage custom element attributes

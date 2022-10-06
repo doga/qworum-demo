@@ -27,41 +27,45 @@ window.customElements.define('my-article', MyArticle);
 window.customElements.define('my-site-banner', MySiteBanner);
 
 // UI
-displayTheArticlesOnSale();
-displayCartTotal();
+show();
 
-function displayCartTotal() {
-  Qworum.getData(['@', 'shopping cart', 'total'], (total) => {
-    if (total instanceof Qworum.message.Json) {
-      total = total.value.EUR;
-    } else {
-      total = 0.0;
-    }
-
-    document.querySelector('#banner').setAttribute('cart-total', `${total}`);
-  });
+async function show() {
+  await displayTheArticlesOnSale();
+  await displayCartTotal();
 }
 
-function displayTheArticlesOnSale() {
+async function displayCartTotal() {
+  let total = await Qworum.getData(['@', 'shopping cart', 'total']);
+
+  if (total instanceof Qworum.message.Json) {
+    total = total.value.EUR;
+  } else {
+    total = 0.0;
+  }
+
+  document.querySelector('#banner').setAttribute('cart-total', `${total}`);
+}
+
+async function displayTheArticlesOnSale() {
   const contentArea = document.getElementById('content');
 
   for (let i = 0; i < articles.length; i++) {
     const
-      article = {
-        data: articles[i],
-        element: document.createElement('my-article')
-      },
-      button = document.createElement('button');
+    article = {
+      data: articles[i],
+      element: document.createElement('my-article')
+    },
+    button = document.createElement('button');
 
     article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
     article.element.setAttribute('description', article.data.description);
     button.append(article.element);
     contentArea.append(button);
 
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       // Execute a Qworum script
       // (See https://qworum.net/en/specification/v1/#script)
-      Qworum.eval(Script(
+      await Qworum.eval(Script(
         Sequence(
           // Call the service end-point to view an article.
           // (See https://qworum.net/en/specification/v1/#call)

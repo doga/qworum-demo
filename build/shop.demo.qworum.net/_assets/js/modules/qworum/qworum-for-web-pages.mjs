@@ -2314,7 +2314,7 @@ class Qworum {
      * Implementation version. 
      * @static
      */
-    static version = '1.0.0';
+    static version = '1.0.1';
 
     /** 
      * Qworum message classes. 
@@ -2521,239 +2521,258 @@ class Qworum {
     /** 
      * 🚀 Checks that the Qworum browser extension is installed and running.
      * @static
-     * @param callback - A function that is executed when/if the Qworum browser extension pings back.
-     * @throws {Error}
+     * @async
+     * @return {Promise<void>} 
      * @example
-     * Qworum.ping(() => console.log('The Qworum browser extension is running.'));
+     * try{
+     *   await Qworum.ping();
+     *   console.info('The ping operation was successful.');
+     * }catch(error){
+     *   console.error('The ping operation was not successful.');
+     * }     
      */
-    static ping(callback) {
-        this._sendMessage(
-            { type: '[Web page API v1] ping' }, callback
-        )
+    static async ping() {
+        try {
+            const response = await this._sendMessage({ type: '[Web page API v1] ping' });
+
+            if (response.status !== 200) {
+                return Promise.reject(new Error('Internal error'));
+            }
+            return Promise.resolve(null);
+        } catch (error) {
+            return Promise.reject(new Error('Writing was not successful'));
+        }
     }
 
     // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
 
-    /**
-     * Profile of functions that are callback parameters for Qworum.setData().
-     * @callback setDataCallback
-     * @param {boolean} success - True if data was written.
-     * @param {string[] | string} path - The path of the data container.
-     * @param {Json | SemanticData} newValue
-     */
-
     /** 
      * 🚀 Sets the value contained in a data container.
      * @static
+     * @async
      * @param {string[] | string} path - The path of the data container.
      * @param {Qworum.message.Json | Qworum.message.SemanticData} newValue
-     * @param {setDataCallback} callback
-     * @throws {Error}
+     * @return {Promise<Qworum.message.Json | Qworum.message.SemanticData>} - The new value of the data container.
      * @example
-     * Qworum.setData('current year', Qworum.Json(2022), () => console.log('The write operation was successful.'));
+     * try{
+     *   await Qworum.setData('year', Qworum.Json(2022));
+     *   console.info('The write operation was successful.');
+     * }catch(error){
+     *   console.error('The write operation was not successful.');
+     * }     
      * @see <https://qworum.net/en/specification/v1/#data>
      */
-    static setData(path, newValue, callback) {
+    static async setData(path, newValue) {
         this._log(`[setData] `);
         // validate path
         if (typeof path === 'string') path = [path];
-        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) {
+            return Promise.reject(new Error('Invalid path'));
+        }
         // validate newValue
         if (!(
             newValue &&
             [Qworum.message.Json, Qworum.message.SemanticData].find(dataType => (newValue instanceof dataType))
-        )) throw new Error('invalid value');
+        )) return Promise.reject(new Error('Invalid value'));
 
-        // set 
-        this._sendMessage(
-            { type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() },
-            (response) => {
-                if (typeof callback !== 'function') return;
-                if (response.status !== 200) {
-                    callback(false, path, newValue); return;
-                }
-                callback(true, path, newValue);
+        try {
+            const response = await this._sendMessage({ 
+                type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() 
+            });
+
+            if (response.status !== 200) {
+                return Promise.reject(new Error('Internal error'));
             }
-        )
+            return Promise.resolve(newValue);
+        } catch (error) {
+            return Promise.reject(new Error('Writing was not successful'));
+        }
     }
 
-    /**
-     * Profile of functions that are callback parameters for Qworum.getData().
-     * @callback getDataCallback
-     * @param {null | Qworum.message.Json | Qworum.message.SemanticData} value - The value of the data container.
-     * @param {string[]} path - The path of the data container.
-     */
+    // TODO add new function: static getMultipleData(paths, callback)?
 
     /** 
      * 🚀 Reads the value contained in a data container.
      * @static
+     * @async
      * @param {string[] | string} path - The path of the data container.
-     * @param {getDataCallback} callback
-     * @throws {Error}
+     * @return {Promise<Qworum.message.Json | Qworum.message.SemanticData>} - The value in the data container.
      * @example
-     * Qworum.getData('current year', (json) => console.log(`Year: ${json.value}`));
+     * try{
+     *   const result = await Qworum.getData(['a data']);
+     *   if (result instanceof Qworum.message.Json){
+     *     console.info(`The read operation was successful, the result is: ${JSON.stringify(result.value)}`);
+     *   }
+     * }catch(error){
+     *   console.error('The read operation was not successful.');
+     * }
      * @see <https://qworum.net/en/specification/v1/#data>
      */
-    static getData(path, callback) { // TODO add new function: static getMultipleData(paths, callback)
+    static async getData(path) { // TODO replace callbacks with promises?
         this._log(`[getData] `);
         if (typeof path === 'string') path = [path];
-        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) throw new Error('invalid path');
+        if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))){
+            return Promise.reject(new Error('Invalid path'));
+        }
 
-        this._sendMessage(
-            { type: '[Web page API v1] get data', path },
-            (response) => {
-                let value = null;
-                if (response.status !== 200) {
-                    callback(value, path); return;
-                }
-                try {
-                    value = Qworum.message.Json.fromIndexedDb(response.body);
-                } catch (error) {
-                    try {
-                        value = Qworum.message.SemanticData.fromIndexedDb(response.body);
-                    } catch (error) {
-                    }
-                }
-                if (typeof callback !== 'function') return;
-                callback(value, path);
+        try {
+            const response = await this._sendMessage({ type: '[Web page API v1] get data', path });
+
+            if (response.status === 404) {
+                return Promise.resolve(null);
+            } else if (response.status !== 200) {
+                return Promise.reject(new Error('Internal error'));
             }
-        )
+    
+            let value = null;
+            try {
+                value = Qworum.message.Json.fromIndexedDb(response.body);
+            } catch (error) {
+                try {
+                    value = Qworum.message.SemanticData.fromIndexedDb(response.body);
+                } catch (error) {
+                }
+            }
+            return Promise.resolve(value);
+        } catch (error) {
+            return Promise.reject(new Error('Internal error occurred'));
+        }
     }
-
-    /**
-     * Profile of functions that are callback parameters for Qworum.eval().
-     * @callback evalCallback
-     * @param {Qworum.message.Fault | Qworum.message.Json | Qworum.message.SemanticData} dataValueOrFault
-     */
 
     /** 
      * 🚀 Evaluates a Qworum script.
      * @static
+     * @async
      * @param {Qworum.message.Script} script
-     * @param {evalCallback} callback
-     * @throws {Error}
+     * @return {Promise<void>}
      * @example
-     * Qworum.eval(Script(Fault()));
+     * try{
+     *   await Qworum.eval(Qworum.Script(Qworum.Goto('next-phase/')));
+     *   console.info('The eval operation was successful.');
+     * }catch(error){
+     *   console.error('The eval operation was not successful.');
+     * }
      * @see <https://qworum.net/en/specification/v1/#script>
      */
-    static eval(script, callback) { // TODO send script in JSON format, remove XML library from this module
+    static async eval(script) { // TODO send script in JSON format, remove XML library from this module
         this._log(`[eval] `);
-        if (!script) return;
+        if (!script) return Promise.reject(new Error('Invalid script'));
 
-        const xmlString = script.toXml();
-        this._log(`[eval] script: ${xmlString}`);
-        this._sendMessage(
-            { type: '[Web page API v1] eval xml script', script: xmlString },
-            (msg) => {
-                Qworum._log(`[eval] received: ${JSON.stringify(msg)}`);
-                if (msg.status !== 200) return;
+        try {
+            const xmlString = script.toXml();
+            this._log(`[eval] script: ${xmlString}`);
+            const msg = await this._sendMessage({ type: '[Web page API v1] eval xml script', script: xmlString });
 
-                // eval yielded a web request, execute it
-                if (msg.body.webRequest) {
-                    const webRequest = msg.body.webRequest;
-                    if (webRequest.phaseParameters) {
-                        Qworum._log('must make an HTTP(S) POST request, using a form');
+            Qworum._log(`[eval] received: ${JSON.stringify(msg)}`);
+            if (msg.status !== 200) return Promise.reject(new Error('Internal error occurred'));
 
-                        const
-                            XhtmlNamespace = 'http://www.w3.org/1999/xhtml',
-                            form = document.createElementNS(XhtmlNamespace, 'form'),
-                            // submitButton         = document.createElementNS(XhtmlNamespace, 'input'),
-                            phaseParametersInput = document.createElementNS(XhtmlNamespace, 'input');
+            // eval yielded a web request, execute it
+            if (msg.body.webRequest) {
+                const webRequest = msg.body.webRequest;
+                if (webRequest.phaseParameters) {
+                    Qworum._log('must make an HTTP(S) POST request, using a form');
+                    const
+                    XhtmlNamespace = 'http://www.w3.org/1999/xhtml',
+                    form = document.createElementNS(XhtmlNamespace, 'form'),
+                    // submitButton         = document.createElementNS(XhtmlNamespace, 'input'),
+                    phaseParametersInput = document.createElementNS(XhtmlNamespace, 'input');
 
-                        form.setAttribute('id', 'qworum-form');
-                        form.setAttribute('name', 'qworum-form');
-                        form.method = 'POST';
-                        form.action = webRequest.url;
-                        // form.setAttribute('method', 'post');
-                        // form.setAttribute('action', webRequest.url);
+                    form.setAttribute('id', 'qworum-form');
+                    form.setAttribute('name', 'qworum-form');
+                    form.method = 'POST';
+                    form.action = webRequest.url;
+                    // form.setAttribute('method', 'post');
+                    // form.setAttribute('action', webRequest.url);
 
-                        // submitButton.setAttribute('type', 'button');
-                        // submitButton.setAttribute('id', 'qworum-submit'); // no needed ?
-                        // submitButton.setAttribute('name', 'qworum-submit');
-                        // submitButton.setAttribute('value', 'submit');
-                        // form.appendChild(submitButton);
+                    // submitButton.setAttribute('type', 'button');
+                    // submitButton.setAttribute('id', 'qworum-submit'); // no needed ?
+                    // submitButton.setAttribute('name', 'qworum-submit');
+                    // submitButton.setAttribute('value', 'submit');
+                    // form.appendChild(submitButton);
 
-                        phaseParametersInput.setAttribute('id', 'qworum-phase-parameters'); // not needed?
-                        phaseParametersInput.setAttribute('name', 'qworum-phase-parameters');
-                        phaseParametersInput.setAttribute('value', webRequest.phaseParameters);
-                        phaseParametersInput.setAttribute('type', 'hidden');
-                        form.appendChild(phaseParametersInput);
+                    phaseParametersInput.setAttribute('id', 'qworum-phase-parameters'); // not needed?
+                    phaseParametersInput.setAttribute('name', 'qworum-phase-parameters');
+                    phaseParametersInput.setAttribute('value', webRequest.phaseParameters);
+                    phaseParametersInput.setAttribute('type', 'hidden');
+                    form.appendChild(phaseParametersInput);
 
-                        document.body.appendChild(form);
+                    document.body.appendChild(form);
 
-                        // alert('sending the POST request ...');
-                        form.submit();
-                        // document.forms[0].submit();
-                        // document.forms['qworum-form'].submit();
-                        // document.getElementById('qworum-form').submit();
-                    } else {
-                        Qworum._log('must make an HTTP(S) GET request; redirecting');
-                        window.location.replace(webRequest.url);
-                    }
-
-                    // eval terminated the Qworum session normally, inform the end user
+                    // alert('sending the POST request ...');
+                    form.submit();
+                    // document.forms[0].submit();
+                    // document.forms['qworum-form'].submit();
+                    // document.getElementById('qworum-form').submit();
                 } else {
-                    // eval terminated the Qworum session normally
-                    let result;
-                    if (msg.body.data) {
-                        Qworum._log('service worker response is data');
-                        for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
-                            try {
-                                result = DataType.fromIndexedDb(msg.body.data);
-                            } catch (error) { }
-                            if (result) break;
-                        }
-                        if (result) {
-                            alert(`The application has terminated normally. Returned data: ${JSON.stringify(result.value)}`);
-                            // window.close(); // Scripts may close only the windows that were opened by them.
-                        } else {
-                            Qworum._log('error: unrecognised data');
-                            result = Qworum.Fault('runtime');
-                        }
-                    }
-
-                    if (msg.body.fault) {
+                    Qworum._log('must make an HTTP(S) GET request; redirecting');
+                    window.location.replace(webRequest.url);
+                }
+                // eval terminated the Qworum session normally, inform the end user
+            } else {
+                // eval terminated the Qworum session normally
+                let result;
+                if (msg.body.data) {
+                    Qworum._log('service worker response is data');
+                    for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
                         try {
-                            result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
-                        } catch (error) {
-                            Qworum._log('error: unrecognised fault');
-                            result = Qworum.Fault('runtime');
-                        }
-                        Qworum._log('service worker response is a fault');
-                        alert(`The application has terminated with a "${result.type}" fault.`);
-                        // window.close(); // Scripts may close only the windows that were opened by them.
+                            result = DataType.fromIndexedDb(msg.body.data);
+                        } catch (error) { }
+                        if (result) break;
                     }
-
-                    if (callback) callback(result);
+                    if (result) {
+                        alert(`The application has terminated normally. Returned data: ${JSON.stringify(result.value)}`);
+                        // window.close(); // Scripts may close only the windows that were opened by them.
+                    } else {
+                        Qworum._log('error: unrecognised data');
+                        result = Qworum.Fault('runtime');
+                    }
                 }
 
+                if (msg.body.fault) {
+                    try {
+                        result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
+                    } catch (error) {
+                        Qworum._log('error: unrecognised fault');
+                        result = Qworum.Fault('runtime');
+                    }
+                    Qworum._log('service worker response is a fault');
+                    alert(`The application has terminated with a "${result.type}" fault.`);
+                    // window.close(); // Scripts may close only the windows that were opened by them.
+                }
             }
-        )
+        } catch (error) {
+            return Promise.reject(new Error('Internal error'));
+        }
+        return Promise.resolve(null);
     }
 
-    static _sendMessage(message, callback) {
+    static _sendMessage(message) {
         const browserExtensionInfo = Qworum.getBrowserExtensionInfo();
         this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
         this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
 
-        try {
-            if (browserExtensionInfo.browserType === 'chrome') {
-                chrome.runtime.sendMessage(
-                    browserExtensionInfo.extensionId,
-                    message,
-
-                    function (response) {
-                        if (!response) throw new Error('The Qworum extension is not installed or is disabled.');
-                        // this._log(`extension -> web page: ${JSON.stringify(response)}`); // BUG? use console.log instead ?
-                        //            console.log(`[Qworum for web pages] from Qworum extension's service worker: ${JSON.stringify(response)}`);
-                        if (typeof callback === 'function') callback(response);
-                    }
-                );
+        return new Promise((resolve, reject) => {
+            try {
+                if (browserExtensionInfo.browserType === 'chrome') {
+                    chrome.runtime.sendMessage(
+                        browserExtensionInfo.extensionId,
+                        message,
+    
+                        (response) => {
+                            if (!response) {
+                                reject(new Error('The Qworum extension is not installed or is disabled.')); return;
+                            }
+                            resolve(response);
+                        }
+                    );
+                } else {
+                    reject(new Error('Unsupported browser.')); return;
+                }
+            } catch (error) {
+                this._log('The Qworum extension is not installed or is disabled.');
+                reject(new Error(`${error}`));
             }
-        } catch (error) {
-            this._log('The Qworum extension is not installed or is disabled.');
-        }
-
+        });
     }
 
     // Returns a non-null value if there is a Qworum extension for this browser.

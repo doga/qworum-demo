@@ -25,8 +25,11 @@ window.customElements.define('my-checkout-button', MyCheckoutButton);
 
 // UI
 
-// Show the line items
-Qworum.getData(['@', 'line items'], (lineItems) => {
+show();
+
+async function show() {
+  // Show the line items
+  let lineItems = await Qworum.getData(['@', 'line items']);
   if(lineItems instanceof Qworum.message.Json){
     lineItems = lineItems.value;
   } else {
@@ -35,14 +38,15 @@ Qworum.getData(['@', 'line items'], (lineItems) => {
   lineItems = JSON.stringify(lineItems);
   // alert(`lineItems: ${lineItems}`);
   document.querySelector('#line-items').setAttribute('line-items', lineItems);
-});
 
-// Set up the close button
-document.querySelector('#close').addEventListener('click', () => {
-  // Execute a Qworum script
-  Qworum.eval(Script(
-    Return(Json(0))
-  ));
-});
+  // Set up the close button
+  document.querySelector('#close').addEventListener('click', async () => {
+    // Execute a Qworum script
+    await Qworum.eval(Script(
+      Return(Json(0))
+    ));
+  });
+
+}
 
 
