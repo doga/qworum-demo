@@ -1,6 +1,5 @@
 /**
  * Qworum for web pages. This ES JavaScript library exports the Qworum class.
- * @version 0.9.1
  * @author Doğa Armangil <d.armangil@qworum.net>
  * @license MIT License <https://opensource.org/licenses/MIT>
  * @see <https://qworum.net>
@@ -2314,7 +2313,7 @@ class Qworum {
      * Implementation version. 
      * @static
      */
-    static version = '1.0.1';
+    static version = '1.0.2';
 
     /** 
      * Qworum message classes. 
@@ -2779,10 +2778,19 @@ class Qworum {
     // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website !!!
     static getBrowserExtensionInfo() {
         // extension ids for all supported browsers
-        const browserExtensionIds = {
+        const 
+        isProductionMode = true,
+        // isProductionMode = false,
+        browserExtensionIds = {
             // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
             // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...
-            chrome: 'lmikadfjgkcdcndneebdmkngidngaaab'
+            chrome: isProductionMode ? (
+                // available on Chrome Web Store
+                'leaofcglebjeebmnmlapbnfbjgfiaokg'
+            ) : (
+                // local version
+                'lmikadfjgkcdcndneebdmkngidngaaab'
+            ),
         };
 
         // extension info for this browser
