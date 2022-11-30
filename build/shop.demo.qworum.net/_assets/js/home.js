@@ -3,18 +3,18 @@ import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
 //console.log(`Qworum.version: ${Qworum.version}`);
 const
   // Qworum Data value types
-  Json = Qworum.Json,
-  SemanticData = Qworum.SemanticData,
+  Json = Qworum.runtime.Json,
+  SemanticData = Qworum.runtime.SemanticData,
   // Qworum instructions
-  Data = Qworum.Data,
-  Return = Qworum.Return,
-  Sequence = Qworum.Sequence,
-  Goto = Qworum.Goto,
-  Call = Qworum.Call,
-  Fault = Qworum.Fault,
-  Try = Qworum.Try,
+  Data = Qworum.runtime.Data,
+  Return = Qworum.runtime.Return,
+  Sequence = Qworum.runtime.Sequence,
+  Goto = Qworum.runtime.Goto,
+  Call = Qworum.runtime.Call,
+  Fault = Qworum.runtime.Fault,
+  Try = Qworum.runtime.Try,
   // Qworum script
-  Script = Qworum.Script;
+  Script = Qworum.runtime.Script;
 
 // Application data
 import { articles } from "./modules/articles.mjs";
@@ -35,9 +35,9 @@ async function show() {
 }
 
 async function displayCartTotal() {
-  let total = await Qworum.getData(['@', 'shopping cart', 'total']);
+  let total = await Qworum.runtime.getData(['@', 'shopping cart', 'total']);
 
-  if (total instanceof Qworum.message.Json) {
+  if (total instanceof Qworum.runtime.message.Json) {
     total = total.value.EUR;
   } else {
     total = 0.0;
@@ -51,11 +51,11 @@ async function displayTheArticlesOnSale() {
 
   for (let i = 0; i < articles.length; i++) {
     const
-    article = {
-      data: articles[i],
-      element: document.createElement('my-article')
-    },
-    button = document.createElement('button');
+      article = {
+        data: articles[i],
+        element: document.createElement('my-article')
+      },
+      button = document.createElement('button');
 
     article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
     article.element.setAttribute('description', article.data.description);
@@ -65,7 +65,7 @@ async function displayTheArticlesOnSale() {
     button.addEventListener('click', async () => {
       // Execute a Qworum script
       // (See https://qworum.net/en/specification/v1/#script)
-      await Qworum.eval(Script(
+      await Qworum.runtime.eval(Script(
         Sequence(
           // Call the service end-point to view an article.
           // (See https://qworum.net/en/specification/v1/#call)

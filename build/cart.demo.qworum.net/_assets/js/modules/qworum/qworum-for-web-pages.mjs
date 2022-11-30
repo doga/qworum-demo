@@ -2298,22 +2298,16 @@ const MESSAGE_VERSION = '1.0.0';
 
 
 /**
- * This class allows web pages to use the functionality that is provided by the Qworum browser extension.
+ * This class allows web pages to use the runtime functionality that is provided by the Qworum browser extension.
  * The 📝 sign indicates a function that is used for generating Qworum scripts, 
  * and the 🚀 sign is for functions that call the Qworum browser extension. 
  */
-class Qworum {
+class QworumRuntimeModule {
     /**
      * Not used.
      */
     constructor() { }
 
-
-    /** 
-     * Implementation version. 
-     * @static
-     */
-    static version = '1.0.2';
 
     /** 
      * Qworum message classes. 
@@ -2328,172 +2322,169 @@ class Qworum {
 
     /** 
      * 📝 Builder for Qworum scripts. 
-     * @function Qworum.Script
+     * @function QworumRuntimeModule.Script
      * @static
-     * @param {Qworum.message.Instruction} instruction - The instruction to execute.
-     * @returns {Qworum.message.Script}
+     * @param {QworumRuntimeModule.message.Instruction} instruction - The instruction to execute.
+     * @returns {QworumRuntimeModule.message.Script}
      * @example
-     * const script = Qworum.Script(
-     *   Qworum.Sequence(
+     * const script = 
+     * QworumRuntimeModule.Script(
+     *   QworumRuntimeModule.Sequence(
      *     // Show the user's shopping cart
-     *     Qworum.Call(["@", "shopping cart"], "https://shopping-cart.example/view/")
+     *     QworumRuntimeModule.Call(["@", "shopping cart"], "https://shopping-cart.example/view/")
      * 
      *     // Go back to the current e-shop
-     *     Qworum.Goto("/home/")
+     *     QworumRuntimeModule.Goto("/home/")
      *   )
      * );
      * @see <https://qworum.net/en/specification/v1/#script>
      */
-    static Script = Qworum.message.Script.build;
+    static Script = QworumRuntimeModule.message.Script.build;
 
     /** 
      * 📝 Builder for Call instructions. 
-     * @function Qworum.Call
+     * @function QworumRuntimeModule.Call
      * @static
      * @param {(string[] | string | null | undefined)} object - The path of the Qworum object to call.
      * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
      * @param {(object | object[] | null | undefined)} arguments - Named data value arguments.
      * @param {(object | object[] | null | undefined)} objectArguments - Named Qworum object arguments.
      * @throws {Error}
-     * @returns {Qworum.message.Call}
+     * @returns {QworumRuntimeModule.message.Call}
      * @example
      * // Example 1
-     * const call1 = Qworum.Call('@', 'home/');
+     * const call1 = QworumRuntimeModule.Call('@', 'home/');
      * // Example 2
-     * const call2 = Qworum.Call(
+     * const call2 = QworumRuntimeModule.Call(
      *   '@', 'home/', 
-     *   {name: 'current year', value: Qworum.Json(2022)}
+     *   {name: 'current year', value: QworumRuntimeModule.Json(2022)}
      * );
      * // Example 3
-     * const call3 = Qworum.Call(
+     * const call3 = QworumRuntimeModule.Call(
      *   ['@'], 'home/',
-     *   [{name: 'current year', value: Qworum.Json(2022)}],
+     *   [{name: 'current year', value: QworumRuntimeModule.Json(2022)}],
      *   [{name: , object: ['@', 'a Qworum object']}]
      * );
      * @see <https://qworum.net/en/specification/v1/#call>
      */
-    static Call = Qworum.message.Call.build;
+    static Call = QworumRuntimeModule.message.Call.build;
 
     /** Builder function for Return instructions. */
 
     /** 
      * 📝 Builder for Goto instructions. 
-     * @function Qworum.Goto
+     * @function QworumRuntimeModule.Goto
      * @static
      * @param {(string | null | undefined)} href - The URL of the end-point to call. Can be a relative or absolute URL.
      * @throws {Error}
-     * @returns {Qworum.message.Goto}
+     * @returns {QworumRuntimeModule.message.Goto}
      * @example
-     * const goto = Qworum.Goto(
+     * const goto = QworumRuntimeModule.Goto(
      *   ['@'], 'home/'
      * );
      * @see <https://qworum.net/en/specification/v1/#goto>
      */
-    static Goto = Qworum.message.Goto.build;
+    static Goto = QworumRuntimeModule.message.Goto.build;
 
     /** 
      * 📝 Builder for Return instructions. 
-     * @function Qworum.Return
+     * @function QworumRuntimeModule.Return
      * @static
-     * @param {(Qworum.message.DataValue | Qworum.message.Instruction)} statement - The instruction or data value to evaluate.
+     * @param {(QworumRuntimeModule.message.DataValue | QworumRuntimeModule.message.Instruction)} statement - The instruction or data value to evaluate.
      * @throws {Error}
-     * @returns {Qworum.message.Return}
+     * @returns {QworumRuntimeModule.message.Return}
      * @example
-     * const return1 = Qworum.Return(Qworum.Json(2022));
+     * const return1 = QworumRuntimeModule.Return(QworumRuntimeModule.Json(2022));
      * @see <https://qworum.net/en/specification/v1/#return>
      */
-    static Return = Qworum.message.Return.build;
+    static Return = QworumRuntimeModule.message.Return.build;
 
     /** 
      * 📝 Builder for Sequence instructions. 
-     * @function Qworum.Sequence
+     * @function QworumRuntimeModule.Sequence
      * @static
-     * @param A statement (instruction or data value) or a non-empty array of statements.
+     * @param {(QworumRuntimeModule.message.DataValue | QworumRuntimeModule.message.Instruction | (QworumRuntimeModule.message.DataValue | QworumRuntimeModule.message.Instruction)[])} statements - Statements.
      * @throws {Error}
-     * @returns {Qworum.message.Sequence}
+     * @returns {QworumRuntimeModule.message.Sequence}
      * @example
-     * const sequence = Qworum.Sequence(Qworum.Json(2022));
+     * const sequence = QworumRuntimeModule.Sequence(QworumRuntimeModule.Json(2022));
      * @see <https://qworum.net/en/specification/v1/#sequence>
      */
-    static Sequence = Qworum.message.Sequence.build;
+    static Sequence = QworumRuntimeModule.message.Sequence.build;
 
     /** 
      * 📝 Builder for Fault instructions. 
-     * @function Qworum.Fault
+     * @function QworumRuntimeModule.Fault
      * @static
      * @param {(string | undefined)} type - The type of the raised fault.
      * @throws {Error}
-     * @returns {Qworum.message.Fault}
+     * @returns {QworumRuntimeModule.message.Fault}
      * @example
-     * const fault = Qworum.Fault('* the valve is jammed');
+     * const fault = QworumRuntimeModule.Fault('* the valve is jammed');
      * @see <https://qworum.net/en/specification/v1/#fault>
      */
-    static Fault = Qworum.message.Fault.build;
+    static Fault = QworumRuntimeModule.message.Fault.build;
 
     /** 
      * 📝 Builder function for Try instructions.
-     * @function Qworum.Try
+     * @function QworumRuntimeModule.Try
      * @static
      * @param statement - A statement (instruction or data value) or a non-empty array of statements.
      * @param catchClauses - One catch clause or an array of catch clauses.
      * @throws {Error}
-     * @returns {Qworum.message.Try} 
+     * @returns {QworumRuntimeModule.message.Try} 
      * @example
-     * const try1 = Qworum.Try(
-     *   Qworum.Call('@', 'checkout/'), 
+     * const try1 = QworumRuntimeModule.Try(
+     *   QworumRuntimeModule.Call('@', 'checkout/'), 
      *   [
      *     {catch: ['* the cart is empty'], Json({})}
      *   ]
      * );
      * @see <https://qworum.net/en/specification/v1/#try>
      */
-    static Try = Qworum.message.Try.build;
-
-    /** Builder function for Data instructions. */
+    static Try = QworumRuntimeModule.message.Try.build;
 
     /** 
      * 📝 Builder for Data instructions. 
-     * @function Qworum.Data
+     * @function QworumRuntimeModule.Data
      * @static
      * @param {string | string[]} path - The path of the data container.
-     * @param {(Qworum.message.DataValue | Qworum.message.Instruction | undefined)} statement - An instruction or data value.
+     * @param {(QworumRuntimeModule.message.DataValue | QworumRuntimeModule.message.Instruction | undefined)} statement - An instruction or data value.
      * @throws {Error}
-     * @returns {Qworum.message.Data}
+     * @returns {QworumRuntimeModule.message.Data}
      * @example
      * const
      * // Instruction for setting the value of a data container
-     * data1 = Qworum.Data('data1', Qworum.Json(2022)),
+     * data1 = QworumRuntimeModule.Data('data1', QworumRuntimeModule.Json(2022)),
      * // Instruction for reading the value of the data container
-     * data2 = Qworum.Data('data1');
+     * data2 = QworumRuntimeModule.Data('data1');
      * @see <https://qworum.net/en/specification/v1/#data>
      */
-    static Data = Qworum.message.Data.build;
+    static Data = QworumRuntimeModule.message.Data.build;
 
     /** 
      * 📝 Builder for Json data values. 
-     * @function Qworum.Json
+     * @function QworumRuntimeModule.Json
      * @static
      * @param value - A value that can be serialized to JSON.
      * @throws {Error}
-     * @returns {Qworum.message.Json}
+     * @returns {QworumRuntimeModule.message.Json}
      * @example
-     * const json = Qworum.Json(2022);
+     * const json = QworumRuntimeModule.Json(2022);
      * @see <https://qworum.net/en/specification/v1/#json>
      */
-    static Json = Qworum.message.Json.build;
-
-    /** Builder function for SemanticData data values. */
+    static Json = QworumRuntimeModule.message.Json.build;
 
     /** 
      * 📝 Builder for semantic data values. 
-     * @function Qworum.SemanticData
+     * @function QworumRuntimeModule.SemanticData
      * @static
      * @param {string} value - The semantic data value.
      * @param {string | undefined} type - The type of the semantic data value. One of 'json-ld', 'n-quads'.
      * @throws {Error}
-     * @returns {Qworum.message.SemanticData}
+     * @returns {QworumRuntimeModule.message.SemanticData}
      * @example
-     * const json = Qworum.SemanticData(`{
+     * const json = QworumRuntimeModule.SemanticData(`{
      *   "@context"  : {"@vocab": "https://schema.org/"},
      *   "@id"       : "https://www.wikidata.org/wiki/Q92760",
      *   "@type"     : "Person",
@@ -2503,45 +2494,7 @@ class Qworum {
      * }`);
      * @see <https://qworum.net/en/specification/v1/#semantic>
      */
-    static SemanticData = Qworum.message.SemanticData.build;
-
-    static init() {
-        // TODO remove this when the extension's content script can do window.history.forward() reliably
-        this._sendMessage(
-            { type: '[Web page API v1] in session?' },
-            function (response) {
-                if (!response.inSession) return;
-                window.history.forward();
-            }
-        );
-
-    }
-
-    /** 
-     * 🚀 Checks that the Qworum browser extension is installed and running.
-     * @static
-     * @async
-     * @return {Promise<void>} 
-     * @example
-     * try{
-     *   await Qworum.ping();
-     *   console.info('The ping operation was successful.');
-     * }catch(error){
-     *   console.error('The ping operation was not successful.');
-     * }     
-     */
-    static async ping() {
-        try {
-            const response = await this._sendMessage({ type: '[Web page API v1] ping' });
-
-            if (response.status !== 200) {
-                return Promise.reject(new Error('Internal error'));
-            }
-            return Promise.resolve(null);
-        } catch (error) {
-            return Promise.reject(new Error('Writing was not successful'));
-        }
-    }
+    static SemanticData = QworumRuntimeModule.message.SemanticData.build;
 
     // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
 
@@ -2550,11 +2503,11 @@ class Qworum {
      * @static
      * @async
      * @param {string[] | string} path - The path of the data container.
-     * @param {Qworum.message.Json | Qworum.message.SemanticData} newValue
-     * @return {Promise<Qworum.message.Json | Qworum.message.SemanticData>} - The new value of the data container.
+     * @param {QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData} newValue
+     * @return {Promise<QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData>} - The new value of the data container.
      * @example
      * try{
-     *   await Qworum.setData('year', Qworum.Json(2022));
+     *   await QworumRuntimeModule.setData('year', QworumRuntimeModule.Json(2022));
      *   console.info('The write operation was successful.');
      * }catch(error){
      *   console.error('The write operation was not successful.');
@@ -2562,7 +2515,7 @@ class Qworum {
      * @see <https://qworum.net/en/specification/v1/#data>
      */
     static async setData(path, newValue) {
-        this._log(`[setData] `);
+        Qworum._log(`[setData] `);
         // validate path
         if (typeof path === 'string') path = [path];
         if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))) {
@@ -2571,12 +2524,12 @@ class Qworum {
         // validate newValue
         if (!(
             newValue &&
-            [Qworum.message.Json, Qworum.message.SemanticData].find(dataType => (newValue instanceof dataType))
+            [QworumRuntimeModule.message.Json, QworumRuntimeModule.message.SemanticData].find(dataType => (newValue instanceof dataType))
         )) return Promise.reject(new Error('Invalid value'));
 
         try {
-            const response = await this._sendMessage({ 
-                type: '[Web page API v1] set data', path, value: newValue.toIndexedDb() 
+            const response = await Qworum._sendMessage({ 
+                type: '[Runtime API v1] set data', path, value: newValue.toIndexedDb() 
             });
 
             if (response.status !== 200) {
@@ -2595,11 +2548,11 @@ class Qworum {
      * @static
      * @async
      * @param {string[] | string} path - The path of the data container.
-     * @return {Promise<Qworum.message.Json | Qworum.message.SemanticData>} - The value in the data container.
+     * @return {Promise<QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData>} - The value in the data container.
      * @example
      * try{
-     *   const result = await Qworum.getData(['a data']);
-     *   if (result instanceof Qworum.message.Json){
+     *   const result = await QworumRuntimeModule.getData(['a data']);
+     *   if (result instanceof QworumRuntimeModule.message.Json){
      *     console.info(`The read operation was successful, the result is: ${JSON.stringify(result.value)}`);
      *   }
      * }catch(error){
@@ -2608,14 +2561,14 @@ class Qworum {
      * @see <https://qworum.net/en/specification/v1/#data>
      */
     static async getData(path) { // TODO replace callbacks with promises?
-        this._log(`[getData] `);
+        Qworum._log(`[getData] `);
         if (typeof path === 'string') path = [path];
         if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))){
             return Promise.reject(new Error('Invalid path'));
         }
 
         try {
-            const response = await this._sendMessage({ type: '[Web page API v1] get data', path });
+            const response = await Qworum._sendMessage({ type: '[Runtime API v1] get data', path });
 
             if (response.status === 404) {
                 return Promise.resolve(null);
@@ -2625,10 +2578,10 @@ class Qworum {
     
             let value = null;
             try {
-                value = Qworum.message.Json.fromIndexedDb(response.body);
+                value = QworumRuntimeModule.message.Json.fromIndexedDb(response.body);
             } catch (error) {
                 try {
-                    value = Qworum.message.SemanticData.fromIndexedDb(response.body);
+                    value = QworumRuntimeModule.message.SemanticData.fromIndexedDb(response.body);
                 } catch (error) {
                 }
             }
@@ -2642,11 +2595,11 @@ class Qworum {
      * 🚀 Evaluates a Qworum script.
      * @static
      * @async
-     * @param {Qworum.message.Script} script
+     * @param {QworumRuntimeModule.message.Script} script
      * @return {Promise<void>}
      * @example
      * try{
-     *   await Qworum.eval(Qworum.Script(Qworum.Goto('next-phase/')));
+     *   await QworumRuntimeModule.eval(QworumRuntimeModule.Script(QworumRuntimeModule.Goto('next-phase/')));
      *   console.info('The eval operation was successful.');
      * }catch(error){
      *   console.error('The eval operation was not successful.');
@@ -2654,13 +2607,13 @@ class Qworum {
      * @see <https://qworum.net/en/specification/v1/#script>
      */
     static async eval(script) { // TODO send script in JSON format, remove XML library from this module
-        this._log(`[eval] `);
+        Qworum._log(`[eval] `);
         if (!script) return Promise.reject(new Error('Invalid script'));
 
         try {
             const xmlString = script.toXml();
-            this._log(`[eval] script: ${xmlString}`);
-            const msg = await this._sendMessage({ type: '[Web page API v1] eval xml script', script: xmlString });
+            Qworum._log(`[eval] script: ${xmlString}`);
+            const msg = await Qworum._sendMessage({ type: '[Runtime API v1] eval xml script', script: xmlString });
 
             Qworum._log(`[eval] received: ${JSON.stringify(msg)}`);
             if (msg.status !== 200) return Promise.reject(new Error('Internal error occurred'));
@@ -2712,7 +2665,7 @@ class Qworum {
                 let result;
                 if (msg.body.data) {
                     Qworum._log('service worker response is data');
-                    for (const DataType of [Qworum.message.Json, Qworum.message.SemanticData]) {
+                    for (const DataType of [QworumRuntimeModule.message.Json, QworumRuntimeModule.message.SemanticData]) {
                         try {
                             result = DataType.fromIndexedDb(msg.body.data);
                         } catch (error) { }
@@ -2723,16 +2676,16 @@ class Qworum {
                         // window.close(); // Scripts may close only the windows that were opened by them.
                     } else {
                         Qworum._log('error: unrecognised data');
-                        result = Qworum.Fault('runtime');
+                        result = QworumRuntimeModule.Fault('runtime');
                     }
                 }
 
                 if (msg.body.fault) {
                     try {
-                        result = Qworum.message.Fault.fromIndexedDb(msg.body.fault);
+                        result = QworumRuntimeModule.message.Fault.fromIndexedDb(msg.body.fault);
                     } catch (error) {
                         Qworum._log('error: unrecognised fault');
-                        result = Qworum.Fault('runtime');
+                        result = QworumRuntimeModule.Fault('runtime');
                     }
                     Qworum._log('service worker response is a fault');
                     alert(`The application has terminated with a "${result.type}" fault.`);
@@ -2745,10 +2698,71 @@ class Qworum {
         return Promise.resolve(null);
     }
 
+}
+
+class Qworum {
+    /**
+     * Not used.
+     */
+    constructor() { }
+
+
+    /** 
+     * Implementation version. 
+     * @static
+     */
+    static version = '1.0.3';
+
+    /** 
+     * Qworum runtime. 
+     * @static
+     */
+    static runtime = QworumRuntimeModule;
+
+    static init() {
+        // TODO remove this when the extension's content script can do window.history.forward() reliably
+        Qworum._sendMessage(
+            { type: '[Runtime API v1] in session?' },
+            function (response) {
+                if (!response.inSession) return;
+                window.history.forward();
+            }
+        );
+
+    }
+
+    /** 
+     * 🚀 Checks that the Qworum browser extension is installed and running.
+     * @static
+     * @async
+     * @return {Promise<void>} 
+     * @example
+     * try{
+     *   await Qworum.ping();
+     *   console.info('The ping operation was successful.');
+     * }catch(error){
+     *   console.error('The ping operation was not successful.');
+     * }     
+     */
+    static async ping() {
+        try {
+            const response = await Qworum._sendMessage({ type: '[Browser extension API v1] ping' });
+
+            if (response.status !== 200) {
+                return Promise.reject(new Error('Internal error'));
+            }
+            return Promise.resolve(null);
+        } catch (error) {
+            return Promise.reject(new Error('Writing was not successful'));
+        }
+    }
+
+    // newValue: {type: 'JSONable', value: someValue} or {type: 'domain-specific', value: {type: 'namespace tag', value: xmlString} }
+
     static _sendMessage(message) {
         const browserExtensionInfo = Qworum.getBrowserExtensionInfo();
-        this._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
-        this._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
+        Qworum._log(`Detected browser type: ${browserExtensionInfo.browserType}`);
+        Qworum._log(`to Qworum extension's service worker: ${JSON.stringify(message)}`);
 
         return new Promise((resolve, reject) => {
             try {
@@ -2768,7 +2782,7 @@ class Qworum {
                     reject(new Error('Unsupported browser.')); return;
                 }
             } catch (error) {
-                this._log('The Qworum extension is not installed or is disabled.');
+                Qworum._log('The Qworum extension is not installed or is disabled.');
                 reject(new Error(`${error}`));
             }
         });
@@ -2779,8 +2793,8 @@ class Qworum {
     static getBrowserExtensionInfo() {
         // extension ids for all supported browsers
         const 
-        isProductionMode = true,
-        // isProductionMode = false,
+        // isProductionMode = true,
+        isProductionMode = false,
         browserExtensionIds = {
             // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
             // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...
@@ -2801,13 +2815,15 @@ class Qworum {
             browserExtensionInfo = { browserType, extensionId: browserExtensionIds[browserType] };
         }
         if (!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported by Qworum.');
+        Qworum._log(`extension id: ${JSON.stringify(browserExtensionInfo)}`);
         return browserExtensionInfo;
     }
 
     static _log(message) {
-        //    console.log(`[Qworum for web pages] ${message}`);
+        console.log(`[Qworum for web pages] ${message}`);
     }
 }
+
 
 // Qworum.init();
 

@@ -5,18 +5,18 @@
 import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
 const
   // Qworum Data value types
-  Json = Qworum.Json,
-  SemanticData = Qworum.SemanticData,
+  Json = Qworum.runtime.Json,
+  SemanticData = Qworum.runtime.SemanticData,
   // Qworum instructions
-  Data = Qworum.Data,
-  Return = Qworum.Return,
-  Sequence = Qworum.Sequence,
-  Goto = Qworum.Goto,
-  Call = Qworum.Call,
-  Fault = Qworum.Fault,
-  Try = Qworum.Try,
+  Data = Qworum.runtime.Data,
+  Return = Qworum.runtime.Return,
+  Sequence = Qworum.runtime.Sequence,
+  Goto = Qworum.runtime.Goto,
+  Call = Qworum.runtime.Call,
+  Fault = Qworum.runtime.Fault,
+  Try = Qworum.runtime.Try,
   // Qworum script
-  Script = Qworum.Script;
+  Script = Qworum.runtime.Script;
 
 //console.log(`Qworum.version: ${Qworum.version}`);
 
@@ -26,10 +26,10 @@ async function checkQworumAvailability() {
   try {
     await Qworum.ping();
     console.log(`The Qworum browser extension is running !`);
-  
-      // Execute a Qworum script
-      // (See https://qworum.net/en/specification/v1/#script)
-    await Qworum.eval(
+
+    // Execute a Qworum script
+    // (See https://qworum.net/en/specification/v1/#script)
+    await Qworum.runtime.eval(
       Script(
         // Call the `home` end-point
         Call('@', 'home/')
@@ -40,9 +40,9 @@ async function checkQworumAvailability() {
     );
   } catch (error) {
     console.log(`Error: ${error}`);
-  
+
     // Ask the end-user to install Qworum
     document.querySelector('.hide').className = 'show';
   }
-  
+
 }

@@ -3,18 +3,18 @@ import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
 //console.log(`Qworum.version: ${Qworum.version}`);
 const
   // Qworum Data value types
-  Json = Qworum.Json,
-  SemanticData = Qworum.SemanticData,
+  Json = Qworum.runtime.Json,
+  SemanticData = Qworum.runtime.SemanticData,
   // Qworum instructions
-  Data = Qworum.Data,
-  Return = Qworum.Return,
-  Sequence = Qworum.Sequence,
-  Goto = Qworum.Goto,
-  Call = Qworum.Call,
-  Fault = Qworum.Fault,
-  Try = Qworum.Try,
+  Data = Qworum.runtime.Data,
+  Return = Qworum.runtime.Return,
+  Sequence = Qworum.runtime.Sequence,
+  Goto = Qworum.runtime.Goto,
+  Call = Qworum.runtime.Call,
+  Fault = Qworum.runtime.Fault,
+  Try = Qworum.runtime.Try,
   // Qworum script
-  Script = Qworum.Script;
+  Script = Qworum.runtime.Script;
 
 // Application data
 import { articles } from "./modules/articles.mjs";
@@ -31,9 +31,9 @@ window.customElements.define('my-site-banner', MySiteBanner);
 show();
 
 async function show() {
-  let articleId = await Qworum.getData('article id');
-  if (!(articleId && articleId instanceof Qworum.message.Json && articles[articleId.value])) {
-    await Qworum.eval(Script(
+  let articleId = await Qworum.runtime.getData('article id');
+  if (!(articleId && articleId instanceof Qworum.runtime.message.Json && articles[articleId.value])) {
+    await Qworum.runtime.eval(Script(
       Fault('* the "article id" call parameter is missing or invalid')
     ));
     return;
@@ -43,8 +43,8 @@ async function show() {
 }
 
 async function displayCartTotal() {
-  let total = await Qworum.getData(['@', 'shopping cart', 'total']);
-  if (total instanceof Qworum.message.Json) {
+  let total = await Qworum.runtime.getData(['@', 'shopping cart', 'total']);
+  if (total instanceof Qworum.runtime.message.Json) {
     total = total.value.EUR;
   } else {
     total = 0.0;
@@ -56,14 +56,14 @@ async function displayCartTotal() {
 async function displayTheArticleOnSale(articleId) {
   // alert(`article id: ${articleId}`);
   const
-  contentArea     = document.getElementById('content'),
-  addToCartButton = document.getElementById('add-to-cart-button'),
-  homepageButton  = document.getElementById('homepage-button'),
-  article         = {
-    id     : articleId,
-    data   : articles[articleId],
-    element: document.createElement('my-article')
-  };
+    contentArea = document.getElementById('content'),
+    addToCartButton = document.getElementById('add-to-cart-button'),
+    homepageButton = document.getElementById('homepage-button'),
+    article = {
+      id: articleId,
+      data: articles[articleId],
+      element: document.createElement('my-article')
+    };
 
   article.element.setAttribute('image', `../_assets/images/articles/${article.data.image}`);
   article.element.setAttribute('description', article.data.description);
@@ -71,7 +71,7 @@ async function displayTheArticleOnSale(articleId) {
 
   addToCartButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    await Qworum.eval(Script(
+    await Qworum.runtime.eval(Script(
       Sequence(
         Call(
           ['@', 'shopping cart'], '@@cart/add-items/',
@@ -94,7 +94,7 @@ async function displayTheArticleOnSale(articleId) {
 
   homepageButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    await Qworum.eval(Script(
+    await Qworum.runtime.eval(Script(
       Return(Json(0))
     ));
   });

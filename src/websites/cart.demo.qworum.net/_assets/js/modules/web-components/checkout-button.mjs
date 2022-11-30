@@ -40,7 +40,7 @@ class MyCheckoutButton extends HTMLElement {
   //   return ['article'];
   // }
   // attributeChangedCallback(attrName, oldValue, newValue) {
-  //   if (attrName === 'article') {
+    // if (attrName === 'article') {
   //     this.article = newValue;
   //     this.shadowRoot.getElementById('button').dataset.article = newValue;
   //     // console.log(`my-add-to-cart-button: set article to ${newValue}`);

@@ -1,19 +1,19 @@
 // Qworum library
 import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
 const
-// Qworum Data value types
-Json         = Qworum.Json,
-SemanticData = Qworum.SemanticData,
-// Qworum instructions
-Data         = Qworum.Data,
-Return       = Qworum.Return,
-Sequence     = Qworum.Sequence,
-Goto         = Qworum.Goto,
-Call         = Qworum.Call,
-Fault        = Qworum.Fault,
-Try          = Qworum.Try,
-// Qworum script
-Script       = Qworum.Script;
+  // Qworum Data value types
+  Json = Qworum.runtime.Json,
+  SemanticData = Qworum.runtime.SemanticData,
+  // Qworum instructions
+  Data = Qworum.runtime.Data,
+  Return = Qworum.runtime.Return,
+  Sequence = Qworum.runtime.Sequence,
+  Goto = Qworum.runtime.Goto,
+  Call = Qworum.runtime.Call,
+  Fault = Qworum.runtime.Fault,
+  Try = Qworum.runtime.Try,
+  // Qworum script
+  Script = Qworum.runtime.Script;
 
 // Web components
 import { MySiteBanner } from "./modules/web-components/site-banner.mjs";
@@ -29,8 +29,8 @@ show();
 
 async function show() {
   // Show the line items
-  let lineItems = await Qworum.getData(['@', 'line items']);
-  if(lineItems instanceof Qworum.message.Json){
+  let lineItems = await Qworum.runtime.getData(['@', 'line items']);
+  if (lineItems instanceof Qworum.runtime.message.Json) {
     lineItems = lineItems.value;
   } else {
     lineItems = [];
@@ -42,7 +42,7 @@ async function show() {
   // Set up the close button
   document.querySelector('#close').addEventListener('click', async () => {
     // Execute a Qworum script
-    await Qworum.eval(Script(
+    await Qworum.runtime.eval(Script(
       Return(Json(0))
     ));
   });
