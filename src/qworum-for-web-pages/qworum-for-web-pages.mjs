@@ -2793,8 +2793,8 @@ class Qworum {
     static getBrowserExtensionInfo() {
         // extension ids for all supported browsers
         const 
-        // isProductionMode = true,
-        isProductionMode = false,
+        isProductionMode = true,
+        // isProductionMode = false,
         browserExtensionIds = {
             // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
             // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...

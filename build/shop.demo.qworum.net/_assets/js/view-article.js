@@ -74,7 +74,7 @@ async function displayTheArticleOnSale(articleId) {
     await Qworum.runtime.eval(Script(
       Sequence(
         Call(
-          ['@', 'shopping cart'], '/build/cart.demo.qworum.net/add-items/',
+          ['@', 'shopping cart'], 'https://cart.demo.qworum.net/add-items/',
           [{
             name: 'line items to add',
             value: Json([{

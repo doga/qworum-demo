@@ -3,8 +3,8 @@
 
 # Before publishing to GitHub, run `rake build` in test mode, and then commit.
 MODES = [:test, :production]
-MODE= MODES.first
-# MODE= MODES.last
+# MODE= MODES.first
+MODE= MODES.last
 
 task default: :help
 

@@ -30,4 +30,6 @@ and then launching the following file with the `Live Server` VS Code extension:
 
 None.
 
-∎
+## License
+
+[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) ∎
