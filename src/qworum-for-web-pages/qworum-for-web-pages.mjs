@@ -1,7 +1,7 @@
 /**
  * Qworum for web pages. This ES JavaScript library exports the Qworum class.
  * @author Doğa Armangil <d.armangil@qworum.net>
- * @license MIT License <https://opensource.org/licenses/MIT>
+ * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0>
  * @see <https://qworum.net>
  */
 
@@ -1245,16 +1245,24 @@ class Instruction {
         throw new Error('not a statement');
     }
 }
+class FaultTypeError extends Error {
+    constructor(message){
+        super(message || 'Not a valid fault');
+    }
+}
 class Fault extends Instruction {
     static tag = "fault";
-    static serviceSpecificPrefix = '*';
+    static serviceSpecificTypes = [
+        'service-specific',
+        /^\*/
+    ];
     static serviceTypes = [
         'service',
         'script',
         'origin',
         'data',
         'path',
-        'service-specific'
+        ...this.serviceSpecificTypes
     ];
     static networkTypes = [
         'network'
@@ -1263,20 +1271,34 @@ class Fault extends Instruction {
         'user-agent',
         'runtime'
     ];
+    static entitlementTypes = [
+        'entitlement',
+        'service entitlement',
+        'platform entitlement'
+    ];
     static types = [
         this.serviceTypes,
         this.networkTypes,
-        this.userAgentTypes
+        this.userAgentTypes,
+        this.entitlementTypes
     ].flat();
-    static defaultType = 'service';
-    _type = Fault.defaultType;
+    static defaultType = this.serviceSpecificTypes[0];
+    _type;
     static build(type) {
         return new Fault(type);
     }
-    constructor(type){
+    constructor(type, types){
         super();
-        if (!(typeof type === 'undefined' || Fault.types.includes(type) || type.startsWith(Fault.serviceSpecificPrefix))) throw new Error('not a fault');
-        this._type = type || Fault.defaultType;
+        if (!type) type = Fault.defaultType;
+        const allowedFaultTypes = types || Fault.serviceSpecificTypes;
+        if (!allowedFaultTypes.find(Fault._typeMatcher(type))) throw new FaultTypeError();
+        this._type = type;
+    }
+    static _typeMatcher(type) {
+        return (typePattern)=>{
+            if (typeof typePattern === 'string' && typePattern === type || typePattern instanceof RegExp && type?.match(typePattern)) return true;
+            return false;
+        };
     }
     get type() {
         return this._type;
@@ -1287,7 +1309,7 @@ class Fault extends Instruction {
     matches(types) {
         let faultTypes = [];
         if (types) {
-            if (typeof types === 'string') {
+            if (!(types instanceof Array)) {
                 faultTypes = [
                     types
                 ];
@@ -1296,32 +1318,33 @@ class Fault extends Instruction {
             }
         }
         if (faultTypes.length === 0) return true;
-        if (faultTypes.includes(this.type)) return true;
-        if (Fault.serviceTypes.includes(this.type) && faultTypes.includes(Fault.serviceTypes[0])) return true;
-        if (Fault.networkTypes.includes(this.type) && faultTypes.includes(Fault.networkTypes[0])) return true;
-        if (Fault.userAgentTypes.includes(this.type) && faultTypes.includes(Fault.userAgentTypes[0])) return true;
-        if (this.type.startsWith(Fault.serviceSpecificPrefix) && faultTypes.includes('service-specific')) return true;
+        const matcher = Fault._typeMatcher(this.type);
+        if (faultTypes.find(matcher)) return true;
+        if (faultTypes.includes(Fault.serviceSpecificTypes[0]) && Fault.serviceSpecificTypes.find(matcher)) return true;
+        if (faultTypes.includes(Fault.serviceTypes[0]) && Fault.serviceTypes.find(matcher)) return true;
+        if (faultTypes.includes(Fault.networkTypes[0]) && Fault.networkTypes.find(matcher)) return true;
+        if (faultTypes.includes(Fault.userAgentTypes[0]) && Fault.userAgentTypes.find(matcher)) return true;
         return false;
     }
     static fromXmlElement(element, namespaceStack) {
+        return new Fault(Fault._typeFromXmlElement(element, namespaceStack));
+    }
+    static _typeFromXmlElement(element, namespaceStack) {
         const nsStack = namespaceStack ? namespaceStack : XmlNamespaceStack.forElement(element);
-        let type = element.attributes.type || Fault.defaultType, result = null, errorMessage = '';
+        let type = '', errorMessage;
         try {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`namespace is not json's`);
             if (!(new URL(namespace).href === Fault.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
-            const type1 = element.attributes.type || Fault.defaultType;
-            result = new Fault(type1);
+            type = element.attributes.type || Fault.defaultType;
         } catch (error) {
             errorMessage = `${error}`;
         } finally{
             nsStack.pop();
         }
-        if (result instanceof Fault) {
-            return result;
-        }
-        throw new Error(errorMessage);
+        if (errorMessage) throw new Error(errorMessage);
+        return type;
     }
     toXmlElement(namespaceStack) {
         const namespace = Instruction.namespace.href, nsStack = namespaceStack || new XmlNamespaceStack(), existingPrefix = nsStack.prefixFor(namespace, null), useNewPrefix = typeof existingPrefix !== 'string', newPrefix = useNewPrefix ? nsStack.prefixFor(namespace, [
@@ -1335,7 +1358,11 @@ class Fault extends Instruction {
     }
     static fromIndexedDb(encoded) {
         if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
-        return new Fault(encoded.value?.type || Fault.defaultType);
+        return new Fault(this._typeFromIndexedDb(encoded));
+    }
+    static _typeFromIndexedDb(encoded) {
+        if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
+        return encoded.value?.type || Fault.defaultType;
     }
     toIndexedDb() {
         return {
@@ -1344,6 +1371,42 @@ class Fault extends Instruction {
                 type: this.type
             }
         };
+    }
+}
+class PlatformFaultTypeError extends Error {
+    constructor(message){
+        super(message || 'Not a platform fault');
+    }
+}
+class PlatformFault extends Fault {
+    constructor(type){
+        if (!(type && PlatformFault.types.includes(type))) throw new PlatformFaultTypeError();
+        super(type, PlatformFault.types);
+    }
+    static build(type) {
+        return new PlatformFault(type);
+    }
+    get type() {
+        return super.type;
+    }
+    toString() {
+        return super.toString();
+    }
+    matches(types) {
+        return super.matches(types);
+    }
+    static fromXmlElement(element, namespaceStack) {
+        return new PlatformFault(Fault._typeFromXmlElement(element, namespaceStack));
+    }
+    toXmlElement(namespaceStack) {
+        return super.toXmlElement(namespaceStack);
+    }
+    static fromIndexedDb(encoded) {
+        if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
+        return new PlatformFault(Fault._typeFromIndexedDb(encoded));
+    }
+    toIndexedDb() {
+        return super.toIndexedDb();
     }
 }
 class Return extends Instruction {
@@ -1630,9 +1693,13 @@ class Try extends Instruction {
                 catchClause['catch'] = catchClauseArg['catch'];
             }
             for (const faultType of catchClause['catch'])try {
-                new Fault(faultType);
-            } catch (error) {
-                throw new Error(`Error for fault type "${faultType}": ${error}`);
+                new PlatformFault(faultType);
+            } catch (_error1) {
+                try {
+                    new Fault(faultType);
+                } catch (_error) {
+                    throw new Error(`Not a valid fault type: "${faultType}"`);
+                }
             }
             if (catchClauseArg['do']) {
                 catchClause['do'] = catchClauseArg['do'];
@@ -1693,9 +1760,13 @@ class Try extends Instruction {
                     if (typeof e.attributes.faults === 'string') {
                         faultsToCatch = JSON.parse(e.attributes.faults).map((s)=>s.trim());
                         for (const faultType of faultsToCatch)try {
-                            new Fault(faultType);
-                        } catch (error) {
-                            throw new Error(`Error for fault type "${faultType}": ${error}`);
+                            new PlatformFault(faultType);
+                        } catch (_error1) {
+                            try {
+                                new Fault(faultType);
+                            } catch (_error) {
+                                throw new Error(`Not a valid fault type: "${faultType}"`);
+                            }
                         }
                     }
                     for (const catchStatementElement of e.children){
@@ -1708,8 +1779,8 @@ class Try extends Instruction {
                         catch: faultsToCatch,
                         do: catchStatements
                     });
-                } catch (error1) {
-                    errorMessage = `${error1}`;
+                } catch (error) {
+                    errorMessage = `${error}`;
                 } finally{
                     nsStack.pop();
                 }
@@ -1717,8 +1788,8 @@ class Try extends Instruction {
             if (!statement) throw new Error(`try has no statement`);
             if (catchClauses.length === 0) throw new Error(`try has no catch clause`);
             result = new Try(statement, catchClauses);
-        } catch (error2) {
-            errorMessage = `${error2}`;
+        } catch (error1) {
+            errorMessage = `${error1}`;
         } finally{
             nsStack.pop();
         }
@@ -2182,7 +2253,7 @@ Instruction.registry = [
     Data,
     Try,
     Goto,
-    Call, 
+    Call
 ];
 class Script {
     static contentType = 'application/xml';
@@ -2286,12 +2357,12 @@ class PhaseParameters {
     }
 }
 // export { DataValue as DataValue, GenericData as GenericData, Json as Json, SemanticData as SemanticData };
-// export { Instruction as Instruction, Data as Data, Return as Return, Sequence as Sequence, Goto as Goto, Call as Call, Fault as Fault, Try as Try };
+// export { Instruction as Instruction, Fault as Fault, FaultTypeError as FaultTypeError, PlatformFault as PlatformFault, PlatformFaultTypeError as PlatformFaultTypeError, Return as Return, Sequence as Sequence, Data as Data, Try as Try, Goto as Goto, Call as Call };
 // export { Script as Script };
 // export { PhaseParameters as PhaseParameters };
-// export const MESSAGE_VERSION = '1.0.0';
+// export const MESSAGE_VERSION = '1.0.3';
 
-const MESSAGE_VERSION = '1.0.0';
+const MESSAGE_VERSION = '1.0.3';
 
 // end qworum-messages-*.mjs
 
@@ -2301,21 +2372,26 @@ const MESSAGE_VERSION = '1.0.0';
  * This class allows web pages to use the runtime functionality that is provided by the Qworum browser extension.
  * The 📝 sign indicates a function that is used for generating Qworum scripts, 
  * and the 🚀 sign is for functions that call the Qworum browser extension. 
+ * 
+ * This class is intended to be referenced through the `Qworum.runtime` pointer rather being explicitly named 
+ * in the application code.
  */
 class QworumRuntimeModule {
     /**
-     * Not used.
+     * Not used, as all methods and properties are static.
      */
     constructor() { }
 
 
     /** 
-     * Qworum message classes. 
+     * A static array containing the Qworum instruction and data classes. 
      * @static
+     * @type {Array}
      */
     static message = {
         GenericData, DataValue, Json, SemanticData,
         Instruction, Data, Return, Sequence, Goto, Call, Fault, Try,
+        FaultTypeError,
         Script,
         PhaseParameters
     };
@@ -2337,7 +2413,7 @@ class QworumRuntimeModule {
      *     QworumRuntimeModule.Goto("/home/")
      *   )
      * );
-     * @see <https://qworum.net/en/specification/v1/#script>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#script)
      */
     static Script = QworumRuntimeModule.message.Script.build;
 
@@ -2365,7 +2441,7 @@ class QworumRuntimeModule {
      *   [{name: 'current year', value: QworumRuntimeModule.Json(2022)}],
      *   [{name: , object: ['@', 'a Qworum object']}]
      * );
-     * @see <https://qworum.net/en/specification/v1/#call>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#call)
      */
     static Call = QworumRuntimeModule.message.Call.build;
 
@@ -2382,7 +2458,7 @@ class QworumRuntimeModule {
      * const goto = QworumRuntimeModule.Goto(
      *   ['@'], 'home/'
      * );
-     * @see <https://qworum.net/en/specification/v1/#goto>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#goto)
      */
     static Goto = QworumRuntimeModule.message.Goto.build;
 
@@ -2395,7 +2471,7 @@ class QworumRuntimeModule {
      * @returns {QworumRuntimeModule.message.Return}
      * @example
      * const return1 = QworumRuntimeModule.Return(QworumRuntimeModule.Json(2022));
-     * @see <https://qworum.net/en/specification/v1/#return>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#return)
      */
     static Return = QworumRuntimeModule.message.Return.build;
 
@@ -2408,20 +2484,20 @@ class QworumRuntimeModule {
      * @returns {QworumRuntimeModule.message.Sequence}
      * @example
      * const sequence = QworumRuntimeModule.Sequence(QworumRuntimeModule.Json(2022));
-     * @see <https://qworum.net/en/specification/v1/#sequence>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#sequence)
      */
     static Sequence = QworumRuntimeModule.message.Sequence.build;
 
     /** 
-     * 📝 Builder for Fault instructions. 
+     * 📝 Builder for Fault instructions. Suitable for service-specific faults only.
      * @function QworumRuntimeModule.Fault
      * @static
      * @param {(string | undefined)} type - The type of the raised fault.
-     * @throws {Error}
+     * @throws {QworumRuntimeModule.message.FaultTypeError}
      * @returns {QworumRuntimeModule.message.Fault}
      * @example
      * const fault = QworumRuntimeModule.Fault('* the valve is jammed');
-     * @see <https://qworum.net/en/specification/v1/#fault>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#fault)
      */
     static Fault = QworumRuntimeModule.message.Fault.build;
 
@@ -2440,7 +2516,7 @@ class QworumRuntimeModule {
      *     {catch: ['* the cart is empty'], Json({})}
      *   ]
      * );
-     * @see <https://qworum.net/en/specification/v1/#try>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#try)
      */
     static Try = QworumRuntimeModule.message.Try.build;
 
@@ -2458,7 +2534,7 @@ class QworumRuntimeModule {
      * data1 = QworumRuntimeModule.Data('data1', QworumRuntimeModule.Json(2022)),
      * // Instruction for reading the value of the data container
      * data2 = QworumRuntimeModule.Data('data1');
-     * @see <https://qworum.net/en/specification/v1/#data>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#data)
      */
     static Data = QworumRuntimeModule.message.Data.build;
 
@@ -2471,7 +2547,7 @@ class QworumRuntimeModule {
      * @returns {QworumRuntimeModule.message.Json}
      * @example
      * const json = QworumRuntimeModule.Json(2022);
-     * @see <https://qworum.net/en/specification/v1/#json>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#json)
      */
     static Json = QworumRuntimeModule.message.Json.build;
 
@@ -2492,7 +2568,7 @@ class QworumRuntimeModule {
      *   "familyName": "Shannon",
      *   "birthDate" : "1916-04-30"
      * }`);
-     * @see <https://qworum.net/en/specification/v1/#semantic>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#semantic)
      */
     static SemanticData = QworumRuntimeModule.message.SemanticData.build;
 
@@ -2505,6 +2581,7 @@ class QworumRuntimeModule {
      * @param {string[] | string} path - The path of the data container.
      * @param {QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData} newValue
      * @return {Promise<QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData>} - The new value of the data container.
+     * @throws {Error}
      * @example
      * try{
      *   await QworumRuntimeModule.setData('year', QworumRuntimeModule.Json(2022));
@@ -2512,7 +2589,7 @@ class QworumRuntimeModule {
      * }catch(error){
      *   console.error('The write operation was not successful.');
      * }     
-     * @see <https://qworum.net/en/specification/v1/#data>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#data)
      */
     static async setData(path, newValue) {
         Qworum._log(`[setData] `);
@@ -2549,6 +2626,7 @@ class QworumRuntimeModule {
      * @async
      * @param {string[] | string} path - The path of the data container.
      * @return {Promise<QworumRuntimeModule.message.Json | QworumRuntimeModule.message.SemanticData>} - The value in the data container.
+     * @throws {Error}
      * @example
      * try{
      *   const result = await QworumRuntimeModule.getData(['a data']);
@@ -2558,9 +2636,9 @@ class QworumRuntimeModule {
      * }catch(error){
      *   console.error('The read operation was not successful.');
      * }
-     * @see <https://qworum.net/en/specification/v1/#data>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#data)
      */
-    static async getData(path) { // TODO replace callbacks with promises?
+    static async getData(path) {
         Qworum._log(`[getData] `);
         if (typeof path === 'string') path = [path];
         if (!(path instanceof Array && !path.find(e => (typeof e !== 'string')))){
@@ -2597,6 +2675,7 @@ class QworumRuntimeModule {
      * @async
      * @param {QworumRuntimeModule.message.Script} script
      * @return {Promise<void>}
+     * @throws {Error} parameter must be a valid script
      * @example
      * try{
      *   await QworumRuntimeModule.eval(QworumRuntimeModule.Script(QworumRuntimeModule.Goto('next-phase/')));
@@ -2604,7 +2683,7 @@ class QworumRuntimeModule {
      * }catch(error){
      *   console.error('The eval operation was not successful.');
      * }
-     * @see <https://qworum.net/en/specification/v1/#script>
+     * @see [Qworum specification](https://qworum.net/en/specification/v1/#script)
      */
     static async eval(script) { // TODO send script in JSON format, remove XML library from this module
         Qworum._log(`[eval] `);
@@ -2700,22 +2779,27 @@ class QworumRuntimeModule {
 
 }
 
+/**
+ * The main Qworum class that allows web pages to use the Qworum browser extension.
+ */
 class Qworum {
     /**
-     * Not used.
+     * Not used, as all methods and properties are static.
      */
     constructor() { }
 
 
     /** 
-     * Implementation version. 
+     * The implementation version (a string).
      * @static
+     * @type {string}
      */
     static version = '1.0.3';
 
     /** 
-     * Qworum runtime. 
+     * Provides access to the Qworum runtime functionality (a pointer to the QworumRuntimeModule class).
      * @static
+     * @type {QworumRuntimeModule}
      */
     static runtime = QworumRuntimeModule;
 
@@ -2736,6 +2820,7 @@ class Qworum {
      * @static
      * @async
      * @return {Promise<void>} 
+     * @throws {Error}
      * @example
      * try{
      *   await Qworum.ping();
