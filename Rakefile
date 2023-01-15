@@ -3,8 +3,8 @@
 
 # Before publishing to GitHub, run `rake build` in test mode, and then commit.
 MODES = [:test, :production]
-# MODE= MODES.first
-MODE= MODES.last
+MODE= MODES.first
+# MODE= MODES.last
 
 task default: :help
 
@@ -29,7 +29,9 @@ URLS = {
 require 'pathname'
 
 desc 'Build the websites'
-task build: [:clear_build, :get_qworum_module_for_web_pages] do
+task build: [:clear_build] do
+# task build: [:clear_build, :get_qworum_module_for_web_pages] do
+
   # copy raw files from src to build
   cp_r Dir.glob('src/websites/*'), 'build'
 
@@ -46,8 +48,14 @@ task build: [:clear_build, :get_qworum_module_for_web_pages] do
     # end
     # puts "#{output.size} lines to modify" 
 
+    # Replace the URL placeholders
     file.readlines.each do |line|
-      output << line.gsub('@@shop', urls[:shop]).gsub('@@cart', urls[:cart]).gsub('@@payments', urls[:payments])
+      output << (
+        line
+        .gsub('@@shop',     urls[:shop])
+        .gsub('@@cart',     urls[:cart])
+        .gsub('@@payments', urls[:payments])
+      )
     end
     file.write output.join('')
   end

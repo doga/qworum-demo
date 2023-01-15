@@ -1,20 +1,22 @@
 // Qworum library
-import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
+// import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
+import { Qworum } from "https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.9";
+// import { Qworum } from "https://cdn.skypack.dev/pin/@qworum/qworum-for-web-pages@v1.0.9-nzYMp2BgqXdEyoY7FP9r/mode=imports,min/optimized/@qworum/qworum-for-web-pages.js";
 //console.log(`Qworum.version: ${Qworum.version}`);
 const
-  // Qworum Data value types
-  Json = Qworum.runtime.Json,
-  SemanticData = Qworum.runtime.SemanticData,
-  // Qworum instructions
-  Data = Qworum.runtime.Data,
-  Return = Qworum.runtime.Return,
-  Sequence = Qworum.runtime.Sequence,
-  Goto = Qworum.runtime.Goto,
-  Call = Qworum.runtime.Call,
-  Fault = Qworum.runtime.Fault,
-  Try = Qworum.runtime.Try,
-  // Qworum script
-  Script = Qworum.runtime.Script;
+// Qworum Data value types
+Json         = Qworum.Json,
+SemanticData = Qworum.SemanticData,
+// Qworum instructions
+Data     = Qworum.Data,
+Return   = Qworum.Return,
+Sequence = Qworum.Sequence,
+Goto     = Qworum.Goto,
+Call     = Qworum.Call,
+Fault    = Qworum.Fault,
+Try      = Qworum.Try,
+// Qworum script
+Script = Qworum.Script;
 
 // Application data
 import { articles } from "./modules/articles.mjs";
@@ -31,9 +33,9 @@ window.customElements.define('my-site-banner', MySiteBanner);
 show();
 
 async function show() {
-  let articleId = await Qworum.runtime.getData('article id');
-  if (!(articleId && articleId instanceof Qworum.runtime.message.Json && articles[articleId.value])) {
-    await Qworum.runtime.eval(Script(
+  let articleId = await Qworum.getData('article id');
+  if (!(articleId && articleId instanceof Qworum.message.Json && articles[articleId.value])) {
+    await Qworum.eval(Script(
       Fault('* the "article id" call parameter is missing or invalid')
     ));
     return;
@@ -43,8 +45,8 @@ async function show() {
 }
 
 async function displayCartTotal() {
-  let total = await Qworum.runtime.getData(['@', 'shopping cart', 'total']);
-  if (total instanceof Qworum.runtime.message.Json) {
+  let total = await Qworum.getData(['@', 'shopping cart', 'total']);
+  if (total instanceof Qworum.message.Json) {
     total = total.value.EUR;
   } else {
     total = 0.0;
@@ -71,15 +73,13 @@ async function displayTheArticleOnSale(articleId) {
 
   addToCartButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    await Qworum.runtime.eval(Script(
+    await Qworum.eval(Script(
       Sequence(
         Call(
-          ['@', 'shopping cart'], 'https://cart.demo.qworum.net/add-items/',
+          ['@', 'shopping cart'], '/build/cart.demo.qworum.net/add-items/',
           [{
             name: 'line items to add',
             value: Json([{
-              // article: {
-              // }, 
               id: article.id,
               title: article.data.title,
               price: article.data.price,
@@ -94,7 +94,7 @@ async function displayTheArticleOnSale(articleId) {
 
   homepageButton.addEventListener('click', async () => {
     // Execute a Qworum script
-    await Qworum.runtime.eval(Script(
+    await Qworum.eval(Script(
       Return(Json(0))
     ));
   });
