@@ -56,4 +56,4 @@ if (!lang) lang = siteLanguages[0];
 
 //console.log(`lang: ${lang}`);
 
-window.location.assign(`/build/shop.demo.qworum.net/check-qworum-availability-${lang}.html`);
+window.location.assign(`https://shop.demo.qworum.net/check-qworum-availability-${lang}.html`);

@@ -22,7 +22,7 @@ class DataValue {
     }
     static fromXmlElement(element, namespaceStack) {
         let errorMessage = 'Not valid data';
-        for (const dataType of this.registry){
+        for (const dataType of DataValue.registry){
             try {
                 const data = dataType.fromXmlElement(element, namespaceStack);
                 return data;
@@ -37,7 +37,7 @@ class DataValue {
     }
     static fromIndexedDb(encodedData) {
         let errorMessage = 'Not valid data';
-        for (const dataType of this.registry){
+        for (const dataType of DataValue.registry){
             try {
                 const data = dataType.fromIndexedDb(encodedData);
                 return data;
@@ -56,7 +56,7 @@ class GenericData extends DataValue {
     }
     static fromXmlElement(element, namespaceStack) {
         let errorMessage = 'Not valid data';
-        for (const dataType of this.registry){
+        for (const dataType of GenericData.registry){
             try {
                 const data = dataType.fromXmlElement(element, namespaceStack);
                 return data;
@@ -69,7 +69,7 @@ class GenericData extends DataValue {
     }
     static fromIndexedDb(encodedData) {
         let errorMessage = 'Not valid data';
-        for (const dataType of this.registry){
+        for (const dataType of GenericData.registry){
             try {
                 const data = dataType.fromIndexedDb(encodedData);
                 return data;
@@ -1199,7 +1199,7 @@ class Instruction {
     }
     static fromXmlElement(element, namespaceStack) {
         let errorMessage = 'Not valid instruction';
-        for (const instructionType of this.registry){
+        for (const instructionType of Instruction.registry){
             try {
                 const instruction = instructionType.fromXmlElement(element, namespaceStack);
                 return instruction;
@@ -1212,7 +1212,7 @@ class Instruction {
     }
     static fromIndexedDb(encoded) {
         let errorMessage = 'Not valid instruction';
-        for (const instructionType of this.registry){
+        for (const instructionType of Instruction.registry){
             try {
                 const instruction = instructionType.fromIndexedDb(encoded);
                 return instruction;
@@ -1226,7 +1226,7 @@ class Instruction {
     static statementFromXmlElement(element, namespaceStack) {
         const nsStack = namespaceStack ? namespaceStack : XmlNamespaceStack.forElement(element);
         try {
-            return this.fromXmlElement(element, nsStack);
+            return Instruction.fromXmlElement(element, nsStack);
         } catch (error) {}
         try {
             return DataValue.fromXmlElement(element, nsStack);
@@ -1235,7 +1235,7 @@ class Instruction {
     }
     static statementFromIndexedDb(encodedStatement) {
         try {
-            const instruction = this.fromIndexedDb(encodedStatement);
+            const instruction = Instruction.fromIndexedDb(encodedStatement);
             return instruction;
         } catch (error) {}
         try {
@@ -1267,18 +1267,18 @@ class Fault extends Instruction {
         'origin',
         'data',
         'path',
-        ...this.serviceSpecificTypes,
-        ...this.entitlementTypes
+        ...Fault.serviceSpecificTypes,
+        ...Fault.entitlementTypes
     ];
     static userAgentTypes = [
         'user-agent',
         'runtime'
     ];
     static types = [
-        this.serviceTypes,
-        this.userAgentTypes
+        Fault.serviceTypes,
+        Fault.userAgentTypes
     ].flat();
-    static defaultType = this.serviceSpecificTypes[0];
+    static defaultType = Fault.serviceSpecificTypes[0];
     _type;
     static build(type) {
         return new Fault(type);
@@ -1332,7 +1332,7 @@ class Fault extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`namespace is not json's`);
-            if (!(new URL(namespace).href === Fault.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Fault.namespace.href && tag === Fault.tag)) throw `not a ${Fault.tag}`;
             type = element.attributes.type || Fault.defaultType;
         } catch (error) {
             errorMessage = `${error}`;
@@ -1353,11 +1353,11 @@ class Fault extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
-        return new Fault(this._typeFromIndexedDb(encoded));
+        if (encoded.type !== Fault.tag) throw new Error(`not a ${Fault.tag}`);
+        return new Fault(Fault._typeFromIndexedDb(encoded));
     }
     static _typeFromIndexedDb(encoded) {
-        if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Fault.tag) throw new Error(`not a ${Fault.tag}`);
         return encoded.value?.type || Fault.defaultType;
     }
     toIndexedDb() {
@@ -1399,7 +1399,7 @@ class PlatformFault extends Fault {
         return super.toXmlElement(namespaceStack);
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== Fault.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Fault.tag) throw new Error(`not a ${Fault.tag}`);
         return new PlatformFault(Fault._typeFromIndexedDb(encoded));
     }
     toIndexedDb() {
@@ -1427,7 +1427,7 @@ class Return extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = mod.NamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Return.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Return.namespace.href && tag === Return.tag)) throw `not a ${Return.tag}`;
             let statement = null;
             for (const statementElement of element.children){
                 if (!(statementElement.type === mod.Node.TYPE_ELEMENT)) continue;
@@ -1460,7 +1460,7 @@ class Return extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== this.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Return.tag) throw new Error(`not a ${Return.tag}`);
         return new Return(Instruction.statementFromIndexedDb(encoded.value.statement));
     }
     toIndexedDb() {
@@ -1505,7 +1505,7 @@ class Sequence extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Sequence.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Sequence.namespace.href && tag === Sequence.tag)) throw `not a ${Sequence.tag}`;
             const statements = [];
             for (const statementElement of element.children){
                 if (!(statementElement.type === XmlNode.TYPE_ELEMENT)) continue;
@@ -1539,7 +1539,7 @@ class Sequence extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== this.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Sequence.tag) throw new Error(`not a ${Sequence.tag}`);
         const statements = encoded.value.statements.map((encodedStatement)=>Instruction.statementFromIndexedDb(encodedStatement));
         return new Sequence(...statements);
     }
@@ -1586,9 +1586,9 @@ class Data extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Data.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Data.namespace.href && tag === Data.tag)) throw `not a ${Data.tag}`;
             const maybePath = element.attributes.path;
-            if (typeof maybePath !== 'string') throw new Error(`${this.tag} must have a path`);
+            if (typeof maybePath !== 'string') throw new Error(`${Data.tag} must have a path`);
             let path = [];
             try {
                 path = JSON.parse(maybePath);
@@ -1639,7 +1639,7 @@ class Data extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== Data.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Data.tag) throw new Error(`not a ${Data.tag}`);
         if (encoded.value) {
             if (encoded.value.statement) {
                 return new Data(encoded.value.path, Instruction.statementFromIndexedDb(encoded.value.statement));
@@ -1740,7 +1740,7 @@ class Try extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Try.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Try.namespace.href && tag === Try.tag)) throw `not a ${Try.tag}`;
             let statement = null, catchClauses = [];
             for (const e of element.children){
                 if (!(e.type === XmlNode.TYPE_ELEMENT)) continue;
@@ -1814,7 +1814,7 @@ class Try extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== this.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Try.tag) throw new Error(`not a ${Try.tag}`);
         const statement = Instruction.statementFromIndexedDb(encoded.value.statement), catchClauses = encoded.value.catch.map((c)=>({
                 'catch': c.catch,
                 'do': c.do.map((encodedStatement)=>Instruction.statementFromIndexedDb(encodedStatement))
@@ -1890,7 +1890,7 @@ class Goto extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Goto.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Goto.namespace.href && tag === Goto.tag)) throw `not a ${Goto.tag}`;
             let href = null, parameters = [];
             if (typeof element.attributes.href === 'string') href = element.attributes.href;
             for (const parametersElement of element.children){
@@ -1962,7 +1962,7 @@ class Goto extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== this.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Goto.tag) throw new Error(`not a ${Goto.tag}`);
         return new Goto(encoded.value.href);
     }
     toIndexedDb() {
@@ -2087,9 +2087,9 @@ class Call extends Instruction {
             nsStack.push(element);
             const namespace = nsStack.findNamespace(element.name), tag = XmlNamespaceStack.getElementNameWithoutPrefix(element.name);
             if (!namespace) throw new Error(`not a namespace`);
-            if (!(new URL(namespace).href === Call.namespace.href && tag === this.tag)) throw `not a ${this.tag}`;
+            if (!(new URL(namespace).href === Call.namespace.href && tag === Call.tag)) throw `not a ${Call.tag}`;
             const maybeObject = element.attributes.object;
-            if (typeof maybeObject !== 'string') throw new Error(`${this.tag} must have a path`);
+            if (typeof maybeObject !== 'string') throw new Error(`${Call.tag} must have a path`);
             let object = [];
             try {
                 object = JSON.parse(maybeObject);
@@ -2221,7 +2221,7 @@ class Call extends Instruction {
         return element;
     }
     static fromIndexedDb(encoded) {
-        if (encoded.type !== this.tag) throw new Error(`not a ${this.tag}`);
+        if (encoded.type !== Call.tag) throw new Error(`not a ${Call.tag}`);
         return new Call(encoded.value.object, encoded.value.href, encoded.value.parameters.map((parameter)=>({
                 name: parameter.name,
                 value: Instruction.statementFromIndexedDb(parameter.value)
@@ -2358,9 +2358,9 @@ class PhaseParameters {
 // export { Instruction as Instruction, Fault as Fault, FaultTypeError as FaultTypeError, PlatformFault as PlatformFault, PlatformFaultTypeError as PlatformFaultTypeError, Return as Return, Sequence as Sequence, Data as Data, Try as Try, Goto as Goto, Call as Call };
 // export { Script as Script };
 // export { PhaseParameters as PhaseParameters };
-// export const MESSAGE_VERSION = '1.0.7';
+// export const MESSAGE_VERSION = '1.0.9';
 
-const MESSAGE_VERSION = '1.0.7';
+const MESSAGE_VERSION = '1.0.9';
 
 // end qworum-messages-*.mjs
 
@@ -2425,7 +2425,7 @@ class Qworum {
      * @static
      * @type {string}
      */
-    static version = '1.0.8';
+    static version = '1.0.11';
 
     /** 
      * A static array containing the Qworum instruction and data classes. 
@@ -2559,7 +2559,7 @@ class Qworum {
      * const try1 = Qworum.Try(
      *   Qworum.Call('@', 'checkout/'), 
      *   [
-     *     {catch: ['* the cart is empty'], Json({})}
+     *     {catch: ['* the cart is empty'], do: Json({})}
      *   ]
      * );
      * @see [Qworum specification](https://qworum.net/en/specification/v1/#try)
@@ -2799,9 +2799,11 @@ class Qworum {
      *   const result = await Qworum.getData(['a data']);
      *   if (result instanceof Qworum.message.Json){
      *     console.info(`The read operation was successful, the result is: ${JSON.stringify(result.value)}`);
+     *   } else {
+     *     console.info(`The data has not been set yet. Did you call Qworum.getData(['a data']) beforehand ?`);
      *   }
      * }catch(error){
-     *   console.error('The read operation was not successful.');
+     *   console.error('An unexpected error has occurred during the read.');
      * }
      * @see [Qworum specification](https://qworum.net/en/specification/v1/#data)
      */
@@ -2851,14 +2853,25 @@ class Qworum {
                 if (browserExtensionInfo.browserType === 'chrome') {
                     // TODO use async version of chrome.runtime.sendMessage by omitting the callback (https://developer.chrome.com/docs/extensions/reference/runtime/#method-sendMessage)
                     chrome.runtime.sendMessage( 
-                        browserExtensionInfo.extensionId,
+                        browserExtensionInfo.extensionIds[0],
                         message,
     
                         (response) => {
-                            if (!response) {
-                                reject(new Error('The Qworum extension is not installed or is disabled.')); return;
+                            if (response) {
+                                resolve(response); return;
                             }
-                            resolve(response);
+                            // official Qworum extension not available on browser; try the test version.
+                            chrome.runtime.sendMessage( 
+                                browserExtensionInfo.extensionIds[1],
+                                message,
+            
+                                (response) => {
+                                    if (response) {
+                                        resolve(response); return;
+                                    }
+                                    reject(new Error('The Qworum extension is not installed or is disabled.'));
+                                }
+                            );
                         }
                     );
                 } else {
@@ -2872,33 +2885,24 @@ class Qworum {
     }
 
     // Returns a non-null value if there is a Qworum extension for this browser.
-    // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website !!!
+    // WARNING A non-null value does not mean that 1) the Qworum extension is installed on this browser, or that 2) the browser extension is enabled for this website in the extension manifest !!!
     static getBrowserExtensionInfo() {
-        // extension ids for all supported browsers
-        const 
-        isProductionMode = true,
-        // isProductionMode = false,
-        browserExtensionIds = {
-            // The following extension will be published on the Chrome Web Store (https://chrome.google.com/webstore/category/extensions).
-            // Browsers that support Chrome Web Store: Google Chrome, Microsoft Edge, Brave, Opera ...
-            chrome: isProductionMode ? (
-                // published version (available on Chrome Web Store)
-                'leaofcglebjeebmnmlapbnfbjgfiaokg'
-            ) : (
-                // local version
-                'iboekogiiknedkbpoohiaiejdjjbkaae'
-            ),
-        };
-
-        // extension info for this browser
-        let browserExtensionInfo = null, browserType = null;
+        let browserExtensionInfo = null;
         if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
             // this browser is compatible with Chrome Web Store
-            browserType = 'chrome';
-            browserExtensionInfo = { browserType, extensionId: browserExtensionIds[browserType] };
+            browserExtensionInfo = { 
+                browserType: 'chrome',
+                extensionIds: [
+                    // published version (available on Chrome Web Store)
+                    'leaofcglebjeebmnmlapbnfbjgfiaokg',
+
+                    // local version for testing
+                    'iboekogiiknedkbpoohiaiejdjjbkaae'
+                ]
+            };
         }
-        if (!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported by this.');
-        this._log(`extension id: ${JSON.stringify(browserExtensionInfo)}`);
+        if (!browserExtensionInfo) throw new Error('[Qworum for web pages] Browser not supported.');
+        this._log(`extension info: ${JSON.stringify(browserExtensionInfo)}`);
         return browserExtensionInfo;
     }
 
@@ -2922,7 +2926,7 @@ class Qworum {
     }
 
     static _log(message) {
-        console.info(`[Qworum for web pages] ${message}`);
+        // console.info(`[Qworum for web pages] ${message}`);
     }
 }
 

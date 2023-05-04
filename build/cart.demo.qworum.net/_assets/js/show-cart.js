@@ -1,7 +1,5 @@
 // Qworum library
-// import { Qworum } from "./modules/qworum/qworum-for-web-pages.mjs";
-import { Qworum } from "https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.9";
-// import { Qworum } from "https://cdn.skypack.dev/pin/@qworum/qworum-for-web-pages@v1.0.9-nzYMp2BgqXdEyoY7FP9r/mode=imports,min/optimized/@qworum/qworum-for-web-pages.js";
+import { Qworum } from "https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.11";
 const
 // Qworum Data value types
 Json         = Qworum.Json,
