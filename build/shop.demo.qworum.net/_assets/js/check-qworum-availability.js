@@ -44,6 +44,11 @@ async function checkQworumAvailability() {
 
     // Ask the end-user to install Qworum
     document.querySelector('.hide').className = 'show';
+
+    // This is a workaround for the "prefetching" of this page by browsers.
+    // Prefetching doesn't work with Qworum, because during prefetching the document.location URL does not point the actual page URL, but it points to whatever page the browser happens to be on when it does the prefetching.
+    setInterval(() => location.reload(), 3000);
+    
   }
 
 }

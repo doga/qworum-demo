@@ -17,8 +17,8 @@ APP_MODE= :production
 
 # Determines which Qworum js library to use.
 # If APP_MODE == :production then LIB_MODE == :production is assumed, regardless of the actual value of LIB_MODE.
-LIB_MODE = :development
-# LIB_MODE = :production
+# LIB_MODE = :development
+LIB_MODE = :production
 
 PLACEHOLDER_VALUES = {
   production: {
