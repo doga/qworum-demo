@@ -1,5 +1,5 @@
 // Qworum library
-import { Qworum } from "https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.11";
+import { Qworum } from "https://esm.sh/@qworum/qworum-for-web-pages@1.0.11";
 const
 // Qworum Data value types
 Json         = Qworum.Json,

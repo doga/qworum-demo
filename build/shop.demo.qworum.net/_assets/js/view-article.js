@@ -1,5 +1,5 @@
 // Qworum library
-import { Qworum } from "https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.11";
+import { Qworum } from "https://esm.sh/@qworum/qworum-for-web-pages@1.0.11";
 //console.log(`Qworum.version: ${Qworum.version}`);
 const
 // Qworum Data value types

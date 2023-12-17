@@ -25,7 +25,7 @@ PLACEHOLDER_VALUES = {
     shop:     'https://shop.demo.qworum.net',
     cart:     'https://cart.demo.qworum.net',
     payments: 'https://payments.demo.qworum.net',
-    library:  'https://cdn.skypack.dev/@qworum/qworum-for-web-pages@1.0.11' # always used if APP_MODE == :production
+    library:  'https://esm.sh/@qworum/qworum-for-web-pages@1.0.11' # always used if APP_MODE == :production
   },
   development: {
     shop:     '/build/shop.demo.qworum.net',
