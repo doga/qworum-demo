@@ -2,7 +2,7 @@
 // Used by check-qworum-availability-LANG.html.
 
 // Use Qworum
-import { Qworum } from "https://esm.sh/@qworum/qworum-for-web-pages@1.0.11";
+import { Qworum } from "https://esm.sh/gh/doga/qworum-for-web-pages@1.2.0/mod.mjs";
 
 const
 // Qworum Data value types
